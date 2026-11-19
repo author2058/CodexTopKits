@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "defaultTheme": "neutral",
+  "enabledColors": { "accent": true, "canvas": true, "surface": true, "sidebar": true },
+  "uiFontSizeOverride": null,
+  "themes": {
+    "neutral": { "accent": "#9aa0a6", "canvas": "#181818", "surface": "#242424", "sidebar": "#161616" },
+    "red": { "accent": "#ef5c70", "canvas": "#211218", "surface": "#321923", "sidebar": "#1b1015" },
+    "orange": { "accent": "#f57f4b", "canvas": "#21150e", "surface": "#332014", "sidebar": "#1b110b" },
+    "amber": { "accent": "#e8a43d", "canvas": "#211b0d", "surface": "#332914", "sidebar": "#1b160b" },
+    "yellow": { "accent": "#d8c84e", "canvas": "#201f0e", "surface": "#313016", "sidebar": "#1a190b" },
+    "lime": { "accent": "#9ccf55", "canvas": "#17200e", "surface": "#243116", "sidebar": "#131a0b" },
+    "green": { "accent": "#54c98b", "canvas": "#0f2018", "surface": "#163125", "sidebar": "#0c1a14" },
+    "teal": { "accent": "#36c5b4", "canvas": "#0d201f", "surface": "#14312f", "sidebar": "#0b1a19" },
+    "cyan": { "accent": "#46b8e8", "canvas": "#0d1b23", "surface": "#142a36", "sidebar": "#0b161d" },
+    "blue": { "accent": "#4f8fe8", "canvas": "#0b1526", "surface": "#10213e", "sidebar": "#0d1a30" },
+    "indigo": { "accent": "#6f78e8", "canvas": "#14152a", "surface": "#202043", "sidebar": "#101122" },
+    "violet": { "accent": "#9a74e8", "canvas": "#171126", "surface": "#251942", "sidebar": "#1c1431" },
+    "magenta": { "accent": "#d268ca", "canvas": "#241224", "surface": "#371a37", "sidebar": "#1d0f1d" }
+  },
+  "projects": {},
+  "tasks": {}
+}

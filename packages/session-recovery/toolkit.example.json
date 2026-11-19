@@ -1,0 +1,4 @@
+{
+  "stateDirectory": "./state",
+  "plugins": [{ "module": "codex-toolkit-session", "options": { "cdpPort": "auto", "restoreAgentComposer": false } }]
+}

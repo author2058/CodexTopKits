@@ -1,0 +1,46 @@
+{
+  "name": "codex-toolkit-core",
+  "version": "0.3.48",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./runtime": "./src/runtime.mjs",
+    "./cdp": "./src/cdp.mjs",
+    "./renderer": "./src/renderer.mjs",
+    "./localization": "./src/localization.mjs",
+    "./kits": "./src/features.mjs",
+    "./features": "./src/features.mjs",
+    "./kits/footer": "./kits/footer/index.mjs",
+    "./kits/manager-entry": "./kits/manager-entry/index.mjs",
+    "./kits/app-restart": "./kits/app-restart/index.mjs",
+    "./app-restart-service": "./src/app-restart-service.mjs",
+    "./plugins/footer": "./kits/footer/index.mjs",
+    "./plugins/manager-entry": "./kits/manager-entry/index.mjs",
+    "./kit-runtime": "./src/feature-runtime.mjs",
+    "./feature-runtime": "./src/feature-runtime.mjs"
+  },
+  "bin": {
+    "codex-toolkit": "./src/cli.mjs",
+    "codextopkits-kit-bundle": "./src/kit-bundle-cli.mjs",
+    "codextopkits-kit-pack": "./src/feature-pack.mjs",
+    "codex-toolkit-feature-pack": "./src/feature-pack.mjs"
+  },
+  "files": [
+    "src",
+    "kits",
+    "docs",
+    "assets",
+    "README.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

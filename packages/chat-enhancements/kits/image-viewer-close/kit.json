@@ -1,0 +1,8 @@
+{
+  "id": "image-viewer-close",
+  "version": "0.1.4",
+  "entry": "index.mjs",
+  "coreApiVersion": 1,
+  "dependencies": {},
+  "license": "Apache-2.0"
+}

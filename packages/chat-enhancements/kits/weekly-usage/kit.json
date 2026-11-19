@@ -1,0 +1,11 @@
+{
+  "id": "weekly-usage",
+  "version": "0.1.7",
+  "entry": "index.mjs",
+  "coreApiVersion": 1,
+  "minimumCoreVersion": "0.3.39",
+  "dependencies": {
+    "footer": "^0.1.1"
+  },
+  "license": "Apache-2.0"
+}

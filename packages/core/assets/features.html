@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title data-i18n="title">Kits</title>
+<style>
+:root{color-scheme:light dark}body{font:16px system-ui;background:light-dark(#fff,#17191d);color:light-dark(#1a1c1f,#e9edf5);margin:24px}button,input{font:inherit}button{cursor:pointer}table{border-collapse:collapse;width:100%;margin:16px 0}th,td{text-align:left;padding:8px;border-bottom:1px solid light-dark(#d1d5db,#424752)}input[type=text]{width:100%;box-sizing:border-box;background:light-dark(#f6f7f8,#22252b);color:inherit;border:1px solid light-dark(#9ca3af,#59616f);padding:4px}small{color:light-dark(#555e6b,#b4bdcb)}#status,#error{border:1px solid light-dark(#d1d5db,#424752);border-radius:6px;background:light-dark(#8080800d,#8080801a);padding:10px}#status:empty,#error:empty{display:none}#error{color:light-dark(#b42318,#ff9292);white-space:pre-wrap}#status{white-space:pre-wrap}
+</style>
+<h1 data-i18n="kits">Kits</h1>
+<p data-i18n="intro">Select Kits to run, or prepare an installation or update, then restart the Kit host. Codex and its model connection stay open.</p>
+<button id="restart" data-i18n="restart">Restart Kit host</button>
+<p><label><span data-i18n="localFolder">Local Kit folder</span> <input id="install-directory" type="text" placeholder="Absolute Kit folder" data-i18n-placeholder="absoluteKit"></label> <button id="prepare-install" data-i18n="prepareLocalInstall">Prepare local installation</button></p>
+<div id="updates" hidden>
+  <p><span data-i18n="checkFrom">Check for updates from</span> <span id="update-repository"></span>.</p>
+  <label><span data-i18n="token">GitHub token (required for a private repository)</span> <input id="github-token" type="password" autocomplete="off"></label>
+  <button id="check-updates" data-i18n="checkUpdates">Check for updates</button>
+  <span id="update-result" role="status"></span>
+  <small data-i18n="tokenNotice">The token stays in Toolkit memory until the Toolkit stops; it is not saved to the configuration. A trusted proxy that intercepts HTTPS can also read it.</small>
+  <div id="catalog" hidden><p data-i18n="availableToInstall">Available to install</p><table><thead><tr><th data-i18n="kit">Kit</th><th data-i18n="version">Version</th><th></th></tr></thead><tbody id="available-kits"></tbody></table></div>
+</div>
+<p id="status" role="status"></p>
+<div id="error" role="alert"></div>
+<table><thead><tr><th data-i18n="kit">Kit</th><th data-i18n="version">Version</th><th data-i18n="runAfter">Run after restart</th><th data-i18n="preparedHeading">Prepared installation or update</th></tr></thead><tbody id="features"></tbody></table>
+<small data-i18n="trust">Local folders must contain a trusted kit.json and index.mjs built for this toolkit. Kit code runs with the current user's permissions.</small>
+<script src="../../management-localization.js"></script>
+<script>
+const messages={en:{title:'Kits',kits:'Kits',intro:'Select Kits to run, or prepare an installation or update, then restart the Kit host. Codex and its model connection stay open.',restart:'Restart Kit host',localFolder:'Local Kit folder',absoluteKit:'Absolute Kit folder',prepareLocalInstall:'Prepare local installation',checkFrom:'Check for updates from',token:'GitHub token (required for a private repository)',checkUpdates:'Check for updates',tokenNotice:'The token stays in Toolkit memory until the Toolkit stops; it is not saved to the configuration. A trusted proxy that intercepts HTTPS can also read it.',availableToInstall:'Available to install',kit:'Kit',version:'Version',runAfter:'Run after restart',preparedHeading:'Prepared installation or update',trust:"Local folders must contain a trusted kit.json and index.mjs built for this toolkit. Kit code runs with the current user's permissions.",host:'Host: {phase} · PID {pid}',run:'Run {id}',remote:'Prepare available update',remoteLabel:'Prepare update for {id}',updateFolder:'Absolute update folder',updateFolderLabel:'Update folder for {id}',localUpdate:'Prepare local update',requires:'Requires: {dependencies}',notInstalled:'Not installed',enabled:'enabled',disabled:'disabled',pending:'{version} · pending host restart',available:'Available: {version}',install:'Prepare installation',installLabel:'Prepare installation for {id}',updates:'Updates available: {count}',updatesAndInstalls:'Updates available: {count} · Kits available to install: {installs}',upToDate:'All installed Kits are up to date.'},'zh-Hans':{title:'Kits',kits:'Kits',intro:'选择要运行的插件，或准备安装或更新，然后重启插件宿主。Codex 和模型连接会保持打开。',restart:'重启插件宿主',localFolder:'本地插件文件夹',absoluteKit:'插件文件夹的绝对路径',prepareLocalInstall:'准备本地安装',checkFrom:'检查更新来源：',token:'GitHub 令牌（私有仓库必填）',checkUpdates:'检查更新',tokenNotice:'令牌保留在 Toolkit 内存中，直到 Toolkit 停止，不会保存到配置。拦截 HTTPS 的受信任代理也能读取令牌。',availableToInstall:'可安装的插件',kit:'插件',version:'版本',runAfter:'重启后运行',preparedHeading:'已准备的安装或更新',trust:'本地文件夹必须包含为本 Toolkit 构建且可信的 kit.json 和 index.mjs。插件代码使用当前用户的权限运行。',host:'宿主：{phase} · PID {pid}',run:'运行 {id}',remote:'准备可用更新',remoteLabel:'准备更新 {id}',updateFolder:'更新文件夹的绝对路径',updateFolderLabel:'{id} 的更新文件夹',localUpdate:'准备本地更新',requires:'依赖：{dependencies}',notInstalled:'未安装',enabled:'已启用',disabled:'已停用',pending:'{version} · 等待宿主重启',available:'可用：{version}',install:'准备安装',installLabel:'准备安装 {id}',updates:'可用更新：{count}',updatesAndInstalls:'可用更新：{count} · 可安装插件：{installs}',upToDate:'所有已安装插件均为最新版本。'}};
+Object.assign(messages.en,{phaseStarting:'starting',phaseRunning:'running',phaseWaiting:'waiting for Codex',phaseRestarting:'restarting',phaseError:'error'});
+Object.assign(messages['zh-Hans'],{phaseStarting:'正在启动',phaseRunning:'正在运行',phaseWaiting:'等待 Codex',phaseRestarting:'正在重启',phaseError:'错误'});
+const rows=new Map(), availableRows=new Map(), tbody=document.getElementById('features'), availableBody=document.getElementById('available-kits'), error=document.getElementById('error');
+const text=(node,value)=>{if(node.textContent!==value)node.textContent=value};
+const attribute=(node,name,value)=>{if(node.getAttribute(name)!==value)node.setAttribute(name,value)};
+let lastState=null, updateCounts=null;
+const i18n=window.createCodexTopKitsManagementI18n({messages,onChange:translate,onError:report});
+function translate(){
+  if(lastState){const phases={'starting':'phaseStarting','running':'phaseRunning','waiting-for-app':'phaseWaiting','restarting':'phaseRestarting','error':'phaseError'};text(document.getElementById('status'),i18n.t('host',{phase:phases[lastState.phase]?i18n.t(phases[lastState.phase]):lastState.phase,pid:lastState.hostPid??'—'})+(lastState.errors.length?'\n'+lastState.errors.map(value=>value.message).join('\n'):''));}
+  for(const [id,row]of rows){const item=row.item;attribute(row.enabled,'aria-label',i18n.t('run',{id}));attribute(row.remote,'aria-label',i18n.t('remoteLabel',{id}));attribute(row.directory,'aria-label',i18n.t('updateFolderLabel',{id}));attribute(row.directory,'placeholder',i18n.t('updateFolder'));text(row.remote,i18n.t('remote'));text(row.button,i18n.t('localUpdate'));attribute(row.name,'title',i18n.t('requires',{dependencies:JSON.stringify(item.dependencies)}));text(row.version,item.installed===false?i18n.t('notInstalled'):item.version+' · '+i18n.t(item.enabled?'enabled':'disabled'));text(row.prepared,item.prepared?i18n.t('pending',{version:item.prepared.version}):'—');text(row.available,item.available?i18n.t('available',{version:item.available.version}):'');}
+  for(const [id,row]of availableRows){text(row.button,i18n.t('install'));attribute(row.button,'aria-label',i18n.t('installLabel',{id}));}
+  if(updateCounts){const {count,installs}=updateCounts;text(document.getElementById('update-result'),i18n.t(installs?'updatesAndInstalls':count?'updates':'upToDate',{count,installs}));}
+}
+async function action(path,body={}){error.textContent='';const response=await fetch('api/'+path,{method:'POST',headers:{'content-type':'application/json','x-codex-toolkit-action':'manage'},body:JSON.stringify(body)});const value=await response.json();if(!response.ok)throw new Error(value.error.message);render(value);return value}
+function report(cause){error.textContent=cause.message}
+function render(state){
+  lastState=state;
+  document.getElementById('updates').hidden=!state.updateRepository;text(document.getElementById('update-repository'),state.updateRepository||'');
+  const ids=new Set(state.features.map(value=>value.id));for(const [id,row]of rows)if(!ids.has(id)){row.element.remove();rows.delete(id)}
+  for(const item of state.features){let row=rows.get(item.id);if(!row){
+    const element=document.createElement('tr'),name=document.createElement('td'),version=document.createElement('td'),selection=document.createElement('td'),update=document.createElement('td');
+    const enabled=document.createElement('input');enabled.type='checkbox';enabled.onchange=()=>action('select',{id:item.id,enabled:enabled.checked}).catch(report);selection.append(enabled);
+    const prepared=document.createElement('div'),available=document.createElement('div'),remote=document.createElement('button'),directory=document.createElement('input'),button=document.createElement('button');remote.onclick=()=>action('prepare-update',{id:item.id}).catch(report);directory.type='text';button.onclick=()=>action('prepare',{id:item.id,directory:directory.value}).catch(report);update.append(prepared,available,remote,directory,button);
+    element.append(name,version,selection,update);tbody.append(element);row={element,name,version,enabled,prepared,available,remote,directory,button};rows.set(item.id,row)}
+    row.item=item;text(row.name,item.id);row.enabled.checked=item.desired;row.remote.hidden=!item.available;row.remote.disabled=item.prepared?.version===item.available?.version;row.directory.hidden=row.button.hidden=item.installed===false;
+  }
+  const catalog=state.availableKits||[],availableIds=new Set(catalog.map(value=>value.id));for(const [id,row]of availableRows)if(!availableIds.has(id)){row.element.remove();availableRows.delete(id)}
+  document.getElementById('catalog').hidden=!catalog.length;
+  for(const item of catalog){let row=availableRows.get(item.id);if(!row){const element=document.createElement('tr'),name=document.createElement('td'),version=document.createElement('td'),actionCell=document.createElement('td'),button=document.createElement('button');button.onclick=()=>action('prepare-available-install',{id:item.id}).catch(report);actionCell.append(button);element.append(name,version,actionCell);availableBody.append(element);row={element,name,version,button};availableRows.set(item.id,row)}text(row.name,item.id);text(row.version,item.version)}
+  translate();
+}
+document.getElementById('restart').onclick=async()=>{const button=document.getElementById('restart');button.disabled=true;try{await action('restart')}catch(cause){report(cause)}finally{button.disabled=false}};
+document.getElementById('prepare-install').onclick=()=>action('prepare-install',{directory:document.getElementById('install-directory').value}).catch(report);
+document.getElementById('check-updates').onclick=async()=>{const button=document.getElementById('check-updates'),field=document.getElementById('github-token'),result=document.getElementById('update-result');button.disabled=true;updateCounts=null;text(result,'');try{const state=await action('check-updates',{token:field.value}),count=state.features.filter(item=>item.available).length,installs=(state.availableKits||[]).length;updateCounts={count,installs};translate()}catch(cause){report(cause)}finally{field.value='';button.disabled=false}};
+fetch('api/state').then(response=>response.json()).then(render).catch(report);
+const events=new EventSource('api/events');events.onmessage=event=>{try{render(JSON.parse(event.data))}catch(cause){report(cause)}};
+</script>
+</html>

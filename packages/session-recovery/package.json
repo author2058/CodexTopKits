@@ -1,0 +1,37 @@
+{
+  "name": "codex-toolkit-session",
+  "version": "0.1.16",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./cli": "./src/cli.mjs",
+    "./kits/agent-composer": "./kits/agent-composer/index.mjs",
+    "./kits/agent-model-protection": "./kits/agent-model-protection/index.mjs",
+    "./kits/context-recovery-integration": "./kits/context-recovery-integration/index.mjs",
+    "./model-protection-service": "./src/model-protection-service.mjs",
+    "./context-recovery-service": "./src/context-recovery-kit-service.mjs"
+  },
+  "bin": {
+    "codex-toolkit-session": "./src/cli.mjs"
+  },
+  "peerDependencies": {
+    "codex-toolkit-core": "^0.3.41"
+  },
+  "files": [
+    "src",
+    "assets",
+    "kits",
+    "README.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

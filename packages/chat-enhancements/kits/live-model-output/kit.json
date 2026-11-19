@@ -1,0 +1,11 @@
+{
+  "id": "live-model-output",
+  "version": "0.1.3",
+  "entry": "index.mjs",
+  "coreApiVersion": 1,
+  "minimumCoreVersion": "0.3.39",
+  "dependencies": {
+    "composer-timer": "^0.1.0"
+  },
+  "license": "Apache-2.0"
+}

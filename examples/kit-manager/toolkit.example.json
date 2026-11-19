@@ -1,0 +1,14 @@
+{
+  "stateDirectory": "./state",
+  "powershellPath": "C:/Program Files/PowerShell/7/pwsh.exe",
+  "plugins": [
+    {
+      "module": "codex-toolkit-core/kit-runtime",
+      "options": {
+        "artifacts": [],
+        "enabled": [],
+        "githubUpdates": { "repository": "owner/repository" }
+      }
+    }
+  ]
+}

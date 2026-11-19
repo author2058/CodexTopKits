@@ -1,0 +1,33 @@
+{
+  "name": "codex-toolkit-themes",
+  "version": "0.1.15",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./model": "./src/model.mjs",
+    "./kits/ui-font-size": "./kits/ui-font-size/index.mjs",
+    "./kits/project-thread-colors": "./kits/project-thread-colors/index.mjs",
+    "./kits/profile-panel-shadow": "./kits/profile-panel-shadow/index.mjs",
+    "./feature-service": "./src/feature-service.mjs"
+  },
+  "peerDependencies": {
+    "codex-toolkit-core": "^0.3.41"
+  },
+  "files": [
+    "src",
+    "kits",
+    "assets",
+    "README.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

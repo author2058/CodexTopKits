@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title">Codex theme manager</title>
+  <style>
+    :root { color-scheme:light dark; font-family:"Segoe UI Variable","Microsoft YaHei UI",system-ui,sans-serif; background:light-dark(#f5f7fb,#10131b); color:light-dark(#1a1c1f,#e8edf6); }
+    * { box-sizing:border-box; } body { margin:0; min-width:720px; background:radial-gradient(circle at 0 0,light-dark(#e2eaf8,#1e2940) 0,transparent 31rem),light-dark(#f5f7fb,#10131b); }
+    header { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:20px 28px 18px; border-bottom:1px solid light-dark(#cbd4e1,#273145); background:light-dark(#f5f7fbe6,#131924cc); backdrop-filter:blur(15px); position:sticky; top:0; z-index:2; }
+    h1 { font-size:18px; margin:0; letter-spacing:.2px; } .subtle { color:light-dark(#526174,#98a6bc); font-size:13px; } a { color:light-dark(#345f9d,#b6cefa); } #status { font-size:12px; color:light-dark(#435d83,#9fb3d9); }
+    .header-actions { display:flex; align-items:center; gap:10px; } button.check { flex:none; padding:6px 10px; border:1px solid light-dark(#a5b3c7,#52627c); border-radius:8px; background:light-dark(#e6edf8,#25324a); color:light-dark(#202d40,#edf2fb); font:inherit; font-size:12px; cursor:pointer; }
+    #health-alert { display:none; max-width:1304px; margin:18px auto -2px; padding:15px 18px; border:1px solid light-dark(#c45b65,#9b303b); border-radius:13px; background:light-dark(#fff0f1,#431d27); color:light-dark(#70232d,#ffe7e9); box-shadow:0 14px 34px light-dark(#00000012,#0000002e); } #health-alert.visible { display:block; } #health-alert h2 { margin:0 0 8px; color:light-dark(#842b37,#ffb9c0); font-size:15px; } #health-alert ul { margin:10px 0 0; padding-left:20px; color:light-dark(#70232d,#ffd4d8); font-size:12px; line-height:1.6; }
+    .channel-controls { display:flex; align-items:center; gap:9px; flex-wrap:wrap; justify-content:center; } .channel-caption { color:light-dark(#526174,#9daac0); font-size:12px; margin-right:2px; } .channel-toggle { display:inline-flex; align-items:center; gap:5px; padding:5px 7px; border:1px solid light-dark(#b7c3d3,#3a4860); border-radius:7px; color:light-dark(#344458,#d3dceb); background:light-dark(#eff3f9,#182132); cursor:pointer; font-size:12px; } .channel-toggle:has(input:not(:checked)) { opacity:.62; } .channel-toggle input { accent-color:light-dark(#365f9d,#93afe8); margin:0; } .font-size-control { display:inline-flex; align-items:center; gap:6px; color:light-dark(#344458,#d3dceb); font-size:12px; } .font-size-control select { width:auto; min-width:96px; padding:5px 8px; border-radius:7px; font-size:12px; }
+    main { display:grid; grid-template-columns:minmax(370px,1.15fr) minmax(340px,.85fr); gap:20px; padding:22px 28px 30px; max-width:1360px; margin:auto; }
+    .panel { border:1px solid light-dark(#cbd4e1,#2a3549); border-radius:16px; background:light-dark(#fffffff0,#171e2ae8); box-shadow:0 18px 45px light-dark(#00000012,#00000028); overflow:hidden; } .panel-title { padding:15px 17px; border-bottom:1px solid light-dark(#cbd4e1,#2a3549); font-size:13px; color:light-dark(#43556e,#b9c7de); letter-spacing:.35px; } .group-label { padding:16px 17px 7px; color:light-dark(#56667c,#8492aa); font-size:12px; font-weight:600; }
+    .item { width:100%; border:0; border-left:3px solid transparent; color:inherit; background:transparent; padding:11px 15px 11px 14px; display:flex; gap:11px; align-items:center; text-align:left; cursor:pointer; } .item:hover { background:light-dark(#edf2f9,#222c3d); } .item.selected { background:light-dark(#e4ecf8,#26344b); border-left-color:light-dark(#5476aa,#b8c9eb); }
+    .swatch { width:13px; height:13px; flex:none; border-radius:50%; box-shadow:0 0 0 2px light-dark(#00000018,#ffffff18),0 0 14px currentColor; } .native { background:linear-gradient(135deg,#667085 0 45%,#c1cad8 45% 55%,#667085 55% 100%)!important; color:light-dark(#697789,#9ba8ba)!important; }
+    .item-copy { min-width:0; flex:1; } .item-name { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; } .item-meta { display:block; color:light-dark(#59697d,#93a0b5); font-size:12px; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pill { font-size:11px; color:light-dark(#46566b,#c7d1e2); border:1px solid light-dark(#b6c2d3,#40506a); background:light-dark(#f1f4f9,#1b2536); padding:3px 7px; border-radius:999px; white-space:nowrap; }
+    .details { padding:23px; min-height:450px; } .empty { color:light-dark(#58697e,#94a1b5); line-height:1.6; padding-top:20px; } .detail-kind { color:light-dark(#4c6284,#9fb2d7); font-size:12px; margin-bottom:5px; } h2 { margin:0 0 22px; font-size:21px; overflow-wrap:anywhere; } label { display:block; color:light-dark(#4e6077,#acb9cd); font-size:12px; margin:16px 0 7px; }
+    select { width:100%; appearance:auto; color:light-dark(#202d40,#edf2fb); border:1px solid light-dark(#a5b3c7,#52627c); background:light-dark(#fff,#111724); border-radius:9px; padding:10px; font:inherit; outline:none; } select:focus { border-color:light-dark(#5079b9,#9eb6e9); box-shadow:0 0 0 3px #5b7fc03d; }
+    .effective { display:flex; align-items:center; gap:10px; padding:10px 11px; border-radius:9px; background:light-dark(#f5f7fb,#111724); border:1px solid light-dark(#cbd4e1,#2b3649); } .effective .swatch { width:20px; height:20px; } dl { margin:20px 0 0; border-top:1px solid light-dark(#cbd4e1,#2a3549); } dt { color:light-dark(#58697e,#8291aa); font-size:11px; margin-top:14px; } dd { margin:4px 0 0; color:light-dark(#344458,#d8e0ef); font-size:13px; overflow-wrap:anywhere; } .hint { margin-top:22px; padding-top:16px; border-top:1px solid light-dark(#cbd4e1,#2a3549); color:light-dark(#58697e,#8f9db3); line-height:1.55; font-size:12px; }
+    @media (max-width:800px) { body { min-width:0; } main { grid-template-columns:1fr; padding:14px; } header { padding:16px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1 data-i18n="title">Codex theme manager</h1><div class="subtle" data-i18n="subtitle">Projects and threads observed in the current window</div><a href="../../" class="subtle" data-i18n="back">Back to Codex Desktop Toolkit</a></div>
+    <div class="channel-controls"><span class="channel-caption" data-i18n="global">Apply globally:</span><label class="channel-toggle"><input class="color-channel" type="checkbox" data-channel="accent"><span data-i18n="accent">Accent</span></label><label class="channel-toggle"><input class="color-channel" type="checkbox" data-channel="canvas"><span data-i18n="canvas">Canvas</span></label><label class="channel-toggle"><input class="color-channel" type="checkbox" data-channel="surface"><span data-i18n="surface">Content</span></label><label class="channel-toggle"><input class="color-channel" type="checkbox" data-channel="sidebar"><span data-i18n="sidebar">Sidebar</span></label><label class="font-size-control"><span data-i18n="fontSize">UI font size</span><select id="ui-font-size"><option value="native" data-i18n="followCodex">Follow Codex</option></select></label></div>
+    <div class="header-actions"><div id="status" aria-live="polite">Connecting…</div><button id="check" class="check" type="button" data-i18n="check">Check connection</button></div>
+  </header>
+  <section id="health-alert" role="alert"></section>
+  <main><section class="panel"><div class="panel-title" data-i18n="projectsThreads">Projects and threads</div><div id="items"></div></section><aside class="panel"><div class="panel-title" data-i18n="properties">Properties</div><div id="details" class="details"><div class="empty" data-i18n="empty">Select a project or thread on the left to adjust its color.</div></div></aside></main>
+  <script src="../../management-localization.js"></script>
+  <script>
+    const messages={
+      en:{title:'Codex theme manager',subtitle:'Projects and threads observed in the current window',back:'Back to Codex Desktop Toolkit',global:'Apply globally:',accent:'Accent',canvas:'Canvas',surface:'Content',sidebar:'Sidebar',fontSize:'UI font size',followCodex:'Follow Codex',check:'Check connection',projectsThreads:'Projects and threads',properties:'Properties',empty:'Select a project or thread on the left to adjust its color.',project:'Project',thread:'Thread',unknownProject:'Unknown project',unknown:'Unknown',notFound:'Not found yet',color:'Color',effective:'Current color',threadId:'Thread ID',projectName:'Project name',projectPath:'Project path',current:'Current setting',hint:'Threads inherit their project color by default. Select “Native” to remove theme colors; the global UI font size above still applies.',native:'Native',inherit:'Inherit',nativeOption:'Native (no theme colors)',inheritOption:'Inherit (follow project)',connecting:'Connecting…',disconnected:'Connection interrupted; reopen the manager to view its status.',failure:'Action failed: {message}',issues:'Appearance features reported {count} issues',warning:'Connection warning · {count} issues',connected:'Connected · {projects} projects · {threads} threads',neutral:'Neutral',red:'Red',orange:'Orange',amber:'Amber',yellow:'Yellow',lime:'Lime',green:'Green',teal:'Teal',cyan:'Cyan',blue:'Blue',indigo:'Indigo',violet:'Violet',magenta:'Magenta'},
+      'zh-Hans':{title:'Codex 主题管理器',subtitle:'当前窗口中观察到的工程与任务',back:'返回 Codex Desktop Toolkit',global:'全局应用：',accent:'强调',canvas:'画布',surface:'内容区',sidebar:'侧栏',fontSize:'UI 字号',followCodex:'跟随 Codex',check:'检查接口',projectsThreads:'工程和任务',properties:'属性',empty:'从左侧选择一个工程或任务，以调整它的代表色。',project:'工程',thread:'任务',unknownProject:'未识别工程',unknown:'未识别',notFound:'尚未发现',color:'色彩',effective:'当前代表色',threadId:'任务 ID',projectName:'工程名称',projectPath:'工程路径',current:'当前设置',hint:'任务默认继承工程颜色。选择“原生”只移除主题颜色；UI 字号仍使用上方的全局设置。',native:'原生',inherit:'继承',nativeOption:'原生（不使用主题色）',inheritOption:'继承（跟随工程）',connecting:'连接中…',disconnected:'连接中断；可重新打开管理页查看状态。',failure:'操作失败：{message}',issues:'外观功能发现 {count} 个问题',warning:'接口告警 · {count} 项',connected:'已连接 · {projects} 个工程 · {threads} 个任务',neutral:'中性',red:'红色',orange:'橙色',amber:'琥珀色',yellow:'黄色',lime:'青柠色',green:'绿色',teal:'蓝绿色',cyan:'青色',blue:'蓝色',indigo:'靛蓝色',violet:'紫罗兰色',magenta:'洋红色'}
+    };
+    let model, selected, displayedEntry, displayedKind, assignmentMenuOpen=false, events, i18n, status={key:'connecting'};
+    const t=(key,values)=>i18n.t(key,values);
+    const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const html=(element,value)=>{if(element.innerHTML!==value)element.innerHTML=value;};
+    const palette=new Set(['native','inherit','neutral','red','orange','amber','yellow','lime','green','teal','cyan','blue','indigo','violet','magenta']);
+    const name=value=>palette.has(value)?t(value):value;
+    const color=entry=>entry.theme?`background:${entry.theme.accent};color:${entry.theme.accent}`:'';
+    const swatch=entry=>`<span class="swatch ${entry.theme?'':'native'}" style="${color(entry)}"></span>`;
+    const lookup=()=>selected&&(selected.kind==='project'?model.catalog.projects.find(entry=>entry.name===selected.key):model.catalog.tasks.find(entry=>entry.taskKey===selected.key));
+    function renderItems(){
+      const rows=[];
+      for(const kind of ['project','task']){
+        rows.push(`<div class="group-label">${t(kind==='project'?'project':'thread')}</div>`);
+        for(const entry of model.catalog[kind==='project'?'projects':'tasks']){
+          const key=kind==='project'?entry.name:entry.taskKey;
+          const active=selected?.kind===kind&&selected.key===key;
+          rows.push(`<button class="item ${active?'selected':''}" data-kind="${kind}" data-key="${esc(key)}">${swatch(entry)}<span class="item-copy"><span class="item-name">${esc(kind==='project'?entry.name:entry.title||key)}</span><span class="item-meta">${esc(kind==='project'?(entry.rootPaths||[]).join(' · '):(entry.projectName||t('unknownProject'))+' · '+key)}</span></span><span class="pill">${esc(name(entry.themeId))}</span></button>`);
+        }
+      }
+      html(document.getElementById('items'),rows.join(''));
+    }
+    function renderDetails(){
+      if(assignmentMenuOpen)return;
+      const root=document.getElementById('details'),entry=lookup();
+      if(!entry){selected=null;displayedEntry=null;html(root,`<div class="empty">${esc(t('empty'))}</div>`);return;}
+      displayedEntry=entry;displayedKind=selected.kind;
+      const isTask=selected.kind==='task',assignment=isTask?entry.taskAssignment:entry.projectAssignment;
+      const options=[...(isTask?[['inherit',t('inheritOption')]]:[]),['native',t('nativeOption')],...Object.keys(model.map.themes).map(id=>[id,name(id)])];
+      const details=isTask?[[t('threadId'),entry.taskKey],[t('project'),entry.projectName||t('unknown')],[t('current'),name(assignment)]]:[[t('projectName'),entry.name],[t('projectPath'),(entry.rootPaths||[]).join(' · ')||t('notFound')],[t('current'),name(assignment)]];
+      html(root,`<div class="detail-kind">${t(isTask?'thread':'project')}</div><h2>${esc(isTask?entry.title||entry.taskKey:entry.name)}</h2><label for="assignment">${t('color')}</label><select id="assignment">${options.map(([value,label])=>`<option value="${esc(value)}" ${value===assignment?'selected':''}>${esc(label)}</option>`).join('')}</select><label class="effective-label">${t('effective')}</label><div class="effective">${swatch(entry)}<span>${esc(name(entry.themeId))}</span></div><dl>${details.map(([term,value])=>`<dt>${esc(term)}</dt><dd>${esc(value)}</dd>`).join('')}</dl><div class="hint">${t('hint')}</div>`);
+    }
+    const setText=(element,value)=>{if(element&&element.textContent!==value)element.textContent=value;};
+    function renderStatus(){setText(document.getElementById('status'),t(status.key,status.values));}
+    function translateDynamic(){
+      renderStatus();
+      if(!model)return;
+      const groups=document.querySelectorAll('#items .group-label');setText(groups[0],t('project'));setText(groups[1],t('thread'));
+      for(const button of document.querySelectorAll('#items button[data-kind]')){
+        const entry=(button.dataset.kind==='project'?model.catalog.projects:model.catalog.tasks).find(item=>(button.dataset.kind==='project'?item.name:item.taskKey)===button.dataset.key);
+        if(!entry)continue;
+        if(button.dataset.kind==='task')setText(button.querySelector('.item-meta'),(entry.projectName||t('unknownProject'))+' · '+entry.taskKey);
+        setText(button.querySelector('.pill'),name(entry.themeId));
+      }
+      const alert=document.getElementById('health-alert');setText(alert.querySelector('h2'),t('issues',{count:model.errors.length}));
+      const root=document.getElementById('details'),entry=displayedEntry;
+      if(!entry){setText(root.querySelector('.empty'),t('empty'));return;}
+      const isTask=displayedKind==='task',assignment=isTask?entry.taskAssignment:entry.projectAssignment;
+      setText(root.querySelector('.detail-kind'),t(isTask?'thread':'project'));setText(root.querySelector('label[for="assignment"]'),t('color'));setText(root.querySelector('.effective-label'),t('effective'));
+      for(const option of root.querySelectorAll('#assignment option'))setText(option,option.value==='native'?t('nativeOption'):option.value==='inherit'?t('inheritOption'):name(option.value));
+      setText(root.querySelector('.effective span:not(.swatch)'),name(entry.themeId));
+      const terms=root.querySelectorAll('dt'),values=root.querySelectorAll('dd');
+      [isTask?'threadId':'projectName',isTask?'project':'projectPath','current'].forEach((key,index)=>setText(terms[index],t(key)));
+      setText(values[1],isTask?(entry.projectName||t('unknown')):((entry.rootPaths||[]).join(' · ')||t('notFound')));setText(values[2],name(assignment));setText(root.querySelector('.hint'),t('hint'));
+    }
+    function apply(next){
+      if(model&&next.revision<model.revision)return;
+      model=next;
+      const alert=document.getElementById('health-alert');
+      alert.classList.toggle('visible',model.errors.length>0);
+      html(alert,model.errors.length?`<h2>${esc(t('issues',{count:model.errors.length}))}</h2><ul>${model.errors.map(error=>`<li>${esc(error.targetId||'')} ${esc(error.message)}</li>`).join('')}</ul>`:'');
+      for(const control of document.querySelectorAll('.color-channel')){const value=model.map.enabledColors[control.dataset.channel];if(control.checked!==value)control.checked=value;}
+      const font=document.getElementById('ui-font-size'),value=model.map.uiFontSizeOverride===null?'native':String(model.map.uiFontSizeOverride);
+      if(document.activeElement!==font&&font.value!==value)font.value=value;
+      renderItems();renderDetails();
+      status=model.errors.length?{key:'warning',values:{count:model.errors.length}}:{key:'connected',values:{projects:model.catalog.projects.length,threads:model.catalog.tasks.length}};renderStatus();
+    }
+    async function api(path,body){
+      const response=await fetch(path,body===undefined?{cache:'no-store'}:{method:'POST',headers:{'content-type':'application/json','x-codex-toolkit-action':'manage'},body:JSON.stringify(body)});
+      const value=await response.json();if(!response.ok)throw new Error(value.error?.message||`HTTP ${response.status}`);return value;
+    }
+    const failure=error=>{status={key:'failure',values:{message:error.message}};renderStatus();};
+    document.getElementById('items').addEventListener('click',event=>{const button=event.target.closest('button[data-kind]');if(!button)return;selected={kind:button.dataset.kind,key:button.dataset.key};assignmentMenuOpen=false;renderItems();renderDetails();});
+    const details=document.getElementById('details');
+    details.addEventListener('focusin',event=>{if(event.target.id==='assignment')assignmentMenuOpen=true;});
+    details.addEventListener('pointerdown',event=>{if(event.target.id==='assignment')assignmentMenuOpen=true;});
+    details.addEventListener('focusout',event=>{if(event.target.id==='assignment'){assignmentMenuOpen=false;queueMicrotask(renderDetails);}});
+    details.addEventListener('change',async event=>{
+      if(event.target.id!=='assignment')return;
+      assignmentMenuOpen=false;const control=event.target,choice={...selected,value:control.value};control.disabled=true;
+      try{apply(await api('api/assignment',choice));}catch(error){failure(error);}finally{control.disabled=false;}
+    });
+    const font=document.getElementById('ui-font-size');for(let size=11;size<=24;size++)font.add(new Option(`${size}px`,String(size)));
+    async function appearance(){
+      const controls=[...document.querySelectorAll('.color-channel')];const enabledColors=Object.fromEntries(controls.map(control=>[control.dataset.channel,control.checked]));
+      [...controls,font].forEach(control=>control.disabled=true);
+      try{apply(await api('api/appearance',{enabledColors,uiFontSizeOverride:font.value==='native'?null:Number(font.value)}));}catch(error){failure(error);}finally{[...controls,font].forEach(control=>control.disabled=false);}
+    }
+    document.querySelectorAll('.color-channel').forEach(control=>control.addEventListener('change',appearance));font.addEventListener('change',appearance);
+    document.getElementById('check').addEventListener('click',async event=>{event.target.disabled=true;try{apply(await api('api/check',{}));}catch(error){failure(error);}finally{event.target.disabled=false;}});
+    function connect(){
+      events?.close();events=null;if(document.hidden)return;
+      events=new EventSource('api/events');events.onmessage=event=>{try{apply(JSON.parse(event.data));}catch(error){failure(error);}};
+      events.onerror=()=>{status={key:'disconnected'};renderStatus();};
+    }
+    i18n=window.createCodexTopKitsManagementI18n({messages,onChange:translateDynamic,onError:failure});
+    document.addEventListener('visibilitychange',connect);window.addEventListener('pagehide',()=>events?.close());
+    api('api/state').then(apply).catch(failure);connect();
+  </script>
+</body>
+</html>

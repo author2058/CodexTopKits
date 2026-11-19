@@ -1,0 +1,7 @@
+CodexTopKits
+Copyright 2026 CodexTopKits contributors
+
+This product includes dimension-rounding code adapted to JavaScript from OpenAI Codex.
+Copyright 2025 OpenAI
+Source: https://github.com/openai/codex/blob/rust-v0.166.0-alpha.6/codex-rs/utils/image/src/lib.rs
+Licensed under the Apache License, Version 2.0.

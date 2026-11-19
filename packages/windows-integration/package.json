@@ -1,0 +1,44 @@
+{
+  "name": "codex-toolkit-windows",
+  "version": "0.2.26",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./native-window": "./src/native-window.mjs",
+    "./window-layout": "./src/window-layout.mjs",
+    "./auto-sleep": "./src/auto-sleep.mjs",
+    "./feature-service": "./src/feature-service.mjs",
+    "./read-aloud-service": "./src/read-aloud-service.mjs",
+    "./restart-protection-service": "./src/restart-protection-service.mjs",
+    "./awake-service": "./src/awake-service.mjs",
+    "./kits/window-tabs": "./kits/window-tabs/index.mjs",
+    "./kits/auto-sleep": "./kits/auto-sleep/index.mjs",
+    "./kits/cloud-mark-read": "./kits/cloud-mark-read/index.mjs",
+    "./kits/markdown-edge-read-aloud": "./kits/markdown-edge-read-aloud/index.mjs",
+    "./kits/update-restart-protection": "./kits/update-restart-protection/index.mjs",
+    "./kits/awake-bridge": "./kits/awake-bridge/index.mjs",
+    "./plugins/window-tabs": "./kits/window-tabs/index.mjs",
+    "./plugins/auto-sleep": "./kits/auto-sleep/index.mjs",
+    "./plugins/cloud-mark-read": "./kits/cloud-mark-read/index.mjs"
+  },
+  "peerDependencies": {
+    "codex-toolkit-core": "^0.3.41"
+  },
+  "files": [
+    "src",
+    "kits",
+    "assets",
+    "README.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

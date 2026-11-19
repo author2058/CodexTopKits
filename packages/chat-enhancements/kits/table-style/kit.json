@@ -1,0 +1,8 @@
+{
+  "id": "table-style",
+  "version": "0.1.2",
+  "entry": "index.mjs",
+  "coreApiVersion": 1,
+  "dependencies": {},
+  "license": "Apache-2.0"
+}

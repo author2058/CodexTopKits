@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title">Codex Windows integration</title>
+  <style>
+    :root{color-scheme:light dark;font:16px "Segoe UI Variable","Microsoft YaHei UI",system-ui,sans-serif;background:light-dark(#fff,#10131b);color:light-dark(#1a1c1f,#e8edf6)}body{max-width:960px;margin:0 auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:20px}h1{font-size:22px;margin:0 0 8px}a{color:light-dark(#245ca6,#b6cefa)}button{font:inherit;color:inherit;background:light-dark(#edf2fa,#25324a);border:1px solid light-dark(#9aaac0,#52627c);border-radius:8px;padding:7px 12px;cursor:pointer}p{line-height:1.6;color:light-dark(#555e6b,#aab4c4)}.panel{margin-top:20px;padding:18px;border:1px solid light-dark(#d1d8e3,#35405a);border-radius:12px;background:light-dark(#f7f9fc,#171e2a)}h2{font-size:18px;margin:0 0 12px}#errors{border-color:light-dark(#c76a72,#9b303b);background:light-dark(#fff1f2,#431d27);color:light-dark(#91212b,#ffe7e9)}#errors[hidden]{display:none}li{margin:8px 0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid light-dark(#d1d8e3,#35405a);overflow-wrap:anywhere}#status{font-size:14px;color:light-dark(#555e6b,#aab4c4)}@media(max-width:600px){body{padding:14px}header{align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <header><div><h1 data-i18n="heading">Windows integration</h1><a href="../../" data-i18n="back">Back to Codex Desktop Toolkit</a></div><button id="check" type="button" data-i18n="check">Check again</button></header>
+  <p data-i18n="windowsHelp">Use the footer tabs to switch between open Codex windows. When the moon is enabled, the Toolkit checks activity and requests sleep after all conversations finish and remain idle for one minute. System sleep or wake turns this off.</p>
+  <p data-i18n="edgeHelp">Use the native context menu to read Markdown files aloud in Edge. A green dot on the official update button confirms protection for debug arguments after an update; Codex handles installation.</p>
+  <div id="status" aria-live="polite">Connecting…</div>
+  <section class="panel" id="errors" role="alert" hidden></section>
+  <section class="panel"><h2 data-i18n="current">Current windows</h2><div id="windows">Waiting for a Codex main window.</div></section>
+  <script src="../../management-localization.js"></script>
+  <script>
+    let events,revision=-1,lastState=null,statusKind='connecting',statusError=null;
+    const messages={en:{title:'Codex Windows integration',heading:'Windows integration',back:'Back to Codex Desktop Toolkit',check:'Check again',windowsHelp:'Use the footer tabs to switch between open Codex windows. When the moon is enabled, the Toolkit checks activity and requests sleep after all conversations finish and remain idle for one minute. System sleep or wake turns this off.',edgeHelp:'Use the native context menu to read Markdown files aloud in Edge. A green dot on the official update button confirms protection for debug arguments after an update; Codex handles installation.',current:'Current windows',waiting:'Waiting for a Codex main window.',issues:'Windows integration found {count} issues',found:'Found {count} issues',connected:'Connected · {count} main windows · Automatic sleep {sleep}',on:'on',off:'off',conversation:'Conversation',state:'Status',systemWindow:'System window',running:'Running',unread:'Completed, unread',idle:'Idle',bound:'Connected',pending:'Awaiting confirmation',connecting:'Connecting…',disconnected:'Connection interrupted; reopen the management page to view status.',failed:'Operation failed: {error}'},'zh-Hans':{title:'Codex Windows 窗口集成',heading:'Windows 窗口集成',back:'返回 Codex Desktop Toolkit',check:'重新检查',windowsHelp:'点击底栏标签切换已打开的 Codex 窗口。点亮月亮后，全部会话结束并静置一分钟才会核对状态并请求睡眠；系统睡眠或唤醒会关闭此开关。',edgeHelp:'Markdown 文件的原生右键菜单可用 Edge 朗读。官方更新按钮上的绿点表示更新后保留调试参数的保护已经确认；安装仍由 Codex 原生处理。',current:'当前窗口',waiting:'等待 Codex 主窗口。',issues:'窗口集成发现 {count} 个问题',found:'发现 {count} 个问题',connected:'已连接 · {count} 个主窗口 · 自动睡眠{sleep}',on:'开启',off:'关闭',conversation:'会话',state:'状态',systemWindow:'系统窗口',running:'运行中',unread:'完成未读',idle:'空闲',bound:'已连接',pending:'等待确认',connecting:'连接中…',disconnected:'连接中断；可重新打开管理页查看状态。',failed:'操作失败：{error}'}};
+    const i18n=window.createCodexTopKitsManagementI18n({messages,onChange:()=>render(),onError:error=>failed(error)});
+    const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const html=(node,value)=>{if(node.innerHTML!==value)node.innerHTML=value;};
+    function render(){
+      const state=lastState;
+      if(!state){document.getElementById('windows').textContent=i18n.t('waiting');}
+      else {
+      const errors=document.getElementById('errors');errors.hidden=state.errors.length===0;
+      html(errors,'<h2>'+esc(i18n.t('issues',{count:state.errors.length}))+'</h2><ul>'+state.errors.map(error=>'<li>'+esc(error.message)+'</li>').join('')+'</ul>');
+      html(document.getElementById('windows'),state.windows.length?'<table><thead><tr><th>'+esc(i18n.t('conversation'))+'</th><th>'+esc(i18n.t('state'))+'</th><th>'+esc(i18n.t('systemWindow'))+'</th></tr></thead><tbody>'+state.windows.map(window=>'<tr><td>'+esc(window.title)+'</td><td>'+esc(i18n.t(window.status==='active'?'running':window.unread?'unread':'idle'))+'</td><td>'+esc(i18n.t(window.handle?'bound':'pending'))+'</td></tr>').join('')+'</tbody></table>':esc(i18n.t('waiting')));
+      }
+      document.getElementById('status').textContent=statusKind==='state'?(state.errors.length?i18n.t('found',{count:state.errors.length}):i18n.t('connected',{count:state.windows.length,sleep:i18n.t(state.autoSleep.enabled?'on':'off')})):statusKind==='failed'?i18n.t('failed',{error:statusError}):i18n.t(statusKind);
+    }
+    function apply(state){if(state.revision<revision)return;revision=state.revision;lastState=state;statusKind='state';render();}
+    function failed(error){statusKind='failed';statusError=error.message;render();}
+    async function api(path,body){const response=await fetch(path,body===undefined?{cache:'no-store'}:{method:'POST',headers:{'content-type':'application/json','x-codex-toolkit-action':'manage'},body:JSON.stringify(body)});const value=await response.json();if(!response.ok)throw new Error(value.error?.message||'HTTP '+response.status);return value;}
+    document.getElementById('check').addEventListener('click',async event=>{event.target.disabled=true;try{apply(await api('api/check',{}));}catch(error){failed(error);}finally{event.target.disabled=false;}});
+    function connect(){events?.close();events=null;if(document.hidden)return;events=new EventSource('api/events');events.onmessage=event=>{try{apply(JSON.parse(event.data));}catch(error){failed(error);}};events.onerror=()=>{statusKind='disconnected';render();};}
+    document.addEventListener('visibilitychange',connect);window.addEventListener('pagehide',()=>events?.close());api('api/state').then(apply).catch(failed);connect();
+  </script>
+</body>
+</html>

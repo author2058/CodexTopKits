@@ -1,0 +1,8 @@
+{
+  "id": "context-meter",
+  "version": "0.1.3",
+  "entry": "index.mjs",
+  "coreApiVersion": 1,
+  "dependencies": {},
+  "license": "Apache-2.0"
+}

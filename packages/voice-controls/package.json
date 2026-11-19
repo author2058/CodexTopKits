@@ -1,0 +1,29 @@
+{
+  "name": "codex-toolkit-voice",
+  "version": "0.1.9",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./kits/voice-volume": "./kits/voice-volume/index.mjs"
+  },
+  "peerDependencies": {
+    "codex-toolkit-core": "^0.3.41"
+  },
+  "files": [
+    "src",
+    "kits",
+    "assets",
+    "README.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

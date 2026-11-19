@@ -1,0 +1,49 @@
+{
+  "name": "codex-bandwidth",
+  "version": "0.3.16",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./image-policy": "./src/codex-image-policy.mjs",
+    "./image-audit": "./src/image-delivery-audit.mjs",
+    "./prepare-image": "./src/prepare-model-image.mjs",
+    "./native-policy": "./src/check-codex-image-policy.mjs",
+    "./image-reference-service": "./src/image-reference-kit-service.mjs",
+    "./image-policy-service": "./src/image-policy-kit-service.mjs",
+    "./traffic-observer-service": "./src/traffic-observer-kit-service.mjs",
+    "./kits/image-reference-dedup": "./kits/image-reference-dedup/index.mjs",
+    "./kits/image-policy-rules": "./kits/image-policy-rules/index.mjs",
+    "./kits/traffic-observer": "./kits/traffic-observer/index.mjs"
+  },
+  "bin": {
+    "codex-bandwidth": "./src/cli.mjs"
+  },
+  "peerDependencies": {
+    "codex-toolkit-core": "^0.3.47"
+  },
+  "dependencies": {
+    "sharp": "0.35.5",
+    "ws": "8.22.2"
+  },
+  "files": [
+    "src",
+    "assets",
+    "kits",
+    "third-party",
+    "README.md",
+    "COVERAGE.md",
+    "THIRD-PARTY.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:pure": "node --test test/codex-image-policy.test.mjs test/image-delivery-audit.test.mjs test/image-reference-transform.test.mjs test/traffic-log.test.mjs test/traffic-ingest.test.mjs"
+  }
+}

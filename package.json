@@ -1,0 +1,11 @@
+{
+  "name": "codextopkits-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "Apache-2.0"
+}

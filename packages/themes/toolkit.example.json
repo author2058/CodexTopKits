@@ -1,0 +1,6 @@
+{
+  "stateDirectory": "./state",
+  "plugins": [
+    { "module": "codex-toolkit-themes", "options": { "cdpPort": "auto" } }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "stateDirectory": "./state",
+  "plugins": [
+    { "module": "codex-bandwidth", "options": {} }
+  ]
+}

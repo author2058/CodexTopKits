@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title">Codex Chat Enhancements</title>
+  <style>
+    :root{color-scheme:light dark;font:16px "Segoe UI Variable","Microsoft YaHei UI",system-ui,sans-serif;background:light-dark(#fff,#10131b);color:light-dark(#1a1c1f,#e8edf6)}body{max-width:960px;margin:0 auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:20px}h1{font-size:22px;margin:0 0 8px}a{color:light-dark(#245ca6,#b6cefa)}button{font:inherit;color:inherit;background:light-dark(#edf2fa,#25324a);border:1px solid light-dark(#9aaac0,#52627c);border-radius:8px;padding:7px 12px;cursor:pointer}p{line-height:1.6;color:light-dark(#555e6b,#aab4c4)}.panel{margin-top:20px;padding:18px;border:1px solid light-dark(#d1d8e3,#35405a);border-radius:12px;background:light-dark(#f7f9fc,#171e2a)}h2{font-size:18px;margin:0 0 12px}#errors{border-color:light-dark(#c76a72,#9b303b);background:light-dark(#fff1f2,#431d27);color:light-dark(#91212b,#ffe7e9)}#errors[hidden]{display:none}li{margin:8px 0;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid light-dark(#d1d8e3,#35405a);overflow-wrap:anywhere}td:first-child{max-width:360px}#status{font-size:14px;color:light-dark(#555e6b,#aab4c4)}@media(max-width:600px){body{padding:14px}header{align-items:flex-start}table{font-size:14px}}
+  </style>
+</head>
+<body>
+  <header><div><h1 data-i18n="title">Codex Chat Enhancements</h1><a href="../../" data-i18n="back">Back to Codex Desktop Toolkit</a></div><button id="check" type="button" data-i18n="check">Check again</button></header>
+  <p data-i18n="description">The bottom bar shows native usage; the chat shows output speed, message numbers and times, context usage, and elapsed time. Select the timer to view the model output received so far.</p>
+  <p data-i18n="features">Title icons, fast mode, and child chat model warnings follow native state. Selection actions appear after a delay, rich text is preserved when pasting, and the public hard reset announcement updates every ten minutes.</p>
+  <div id="status" aria-live="polite">Connecting…</div>
+  <section class="panel" id="errors" role="alert" hidden></section>
+  <section class="panel"><h2 data-i18n="windows">Current windows</h2><div id="windows"></div></section>
+  <script src="../../management-localization.js"></script>
+  <script>
+    let events,revision=-1,lastState=null,status={key:'connecting'};
+    const messages={en:{title:'Codex Chat Enhancements',back:'Back to Codex Desktop Toolkit',check:'Check again',description:'The bottom bar shows native usage; the chat shows output speed, message numbers and times, context usage, and elapsed time. Select the timer to view the model output received so far.',features:'Title icons, fast mode, and child chat model warnings follow native state. Selection actions appear after a delay, rich text is preserved when pasting, and the public hard reset announcement updates every ten minutes.',windows:'Current windows',connecting:'Connecting…',issues:'Chat Enhancements issues: {count}',found:'Issues found: {count}',connectedWindows:'Connected · Main windows: {count}',failed:'Operation failed: {error}',disconnected:'Connection interrupted; reopen the management page to view status.',waitingWindow:'Waiting for a Codex main window.',thread:'Conversation',timer:'Timer interface',usage:'Native usage',speed:'Speed labels',newThread:'New conversation',connected:'Connected',waiting:'Waiting for connection',unavailable:'Not yet available'},'zh-Hans':{title:'Codex 聊天增强',back:'返回 Codex Desktop Toolkit',check:'重新检查',description:'底栏显示原生用量；聊天区显示输出速度、序号与时间、上下文用量和运行计时。点击运行计时可查看当前接收到的模型输出。',features:'标题图标、快速模式和子聊天模型提醒随原生状态更新。圈选操作延迟显示，粘贴仍保留富文本；公开硬重置公告每十分钟更新一次。',windows:'当前窗口',connecting:'连接中…',issues:'聊天增强发现 {count} 个问题',found:'发现 {count} 个问题',connectedWindows:'已连接 · {count} 个主窗口',failed:'操作失败：{error}',disconnected:'连接中断；可重新打开管理页查看状态。',waitingWindow:'等待 Codex 主窗口。',thread:'会话',timer:'计时接口',usage:'原生用量',speed:'速度标签',newThread:'新对话',connected:'已连接',waiting:'等待连接',unavailable:'尚未获得'}};
+    const i18n=window.createCodexTopKitsManagementI18n({messages,onChange:renderText,onError:error=>failed(error)});
+    const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const html=(node,value)=>{if(node.innerHTML!==value)node.innerHTML=value;};
+    function renderText(){
+      document.querySelectorAll('[data-chat-text]').forEach(node=>{const value=i18n.t(node.dataset.chatText,node.dataset.chatText==='issues'?{count:lastState.errors.length}:undefined);if(node.textContent!==value)node.textContent=value;});
+      const value=i18n.t(status.key,status.values);const node=document.getElementById('status');if(node.textContent!==value)node.textContent=value;
+    }
+    function apply(state){
+      if(state.revision<revision)return;revision=state.revision;lastState=state;
+      const errors=document.getElementById('errors');errors.hidden=state.errors.length===0;
+      html(errors,'<h2 data-chat-text="issues"></h2><ul>'+state.errors.map(error=>'<li>'+esc(error.message)+'</li>').join('')+'</ul>');
+      const windows=state.windows.filter(window=>window.applicable);
+      html(document.getElementById('windows'),windows.length?'<table><thead><tr><th data-chat-text="thread"></th><th data-chat-text="timer"></th><th data-chat-text="usage"></th><th data-chat-text="speed"></th></tr></thead><tbody>'+windows.map(window=>'<tr><td>'+(window.threadId?esc(window.threadId):'<span data-chat-text="newThread"></span>')+'</td><td data-chat-text="'+((window.capabilities.rpc&&window.capabilities.formatter)?'connected':'waiting')+'"></td><td data-chat-text="'+(window.capabilities.usage?'connected':'unavailable')+'"></td><td>'+window.capabilities.speedPanels.length+'</td></tr>').join('')+'</tbody></table>':'<span data-chat-text="waitingWindow"></span>');
+      status=state.errors.length?{key:'found',values:{count:state.errors.length}}:{key:'connectedWindows',values:{count:windows.length}};renderText();
+    }
+    function failed(error){status={key:'failed',values:{error:error.message}};renderText();}
+    async function api(path,body){const response=await fetch(path,body===undefined?{cache:'no-store'}:{method:'POST',headers:{'content-type':'application/json','x-codex-toolkit-action':'manage'},body:JSON.stringify(body)});const value=await response.json();if(!response.ok)throw new Error(value.error?.message||'HTTP '+response.status);return value;}
+    document.getElementById('check').addEventListener('click',async event=>{event.target.disabled=true;try{apply(await api('api/check',{}));}catch(error){failed(error);}finally{event.target.disabled=false;}});
+    function connect(){events?.close();events=null;if(document.hidden)return;events=new EventSource('api/events');events.onmessage=event=>{try{apply(JSON.parse(event.data));}catch(error){failed(error);}};events.onerror=()=>{status={key:'disconnected'};renderText();};}
+    document.addEventListener('visibilitychange',connect);window.addEventListener('pagehide',()=>events?.close());
+    api('api/state').then(apply).catch(failed);connect();
+  </script>
+</body>
+</html>

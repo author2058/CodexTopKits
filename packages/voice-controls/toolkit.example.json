@@ -1,0 +1,6 @@
+{
+  "stateDirectory": "C:/CodexDesktopToolkit/state",
+  "plugins": [
+    { "module": "codex-toolkit-voice", "options": { "cdpPort": "auto" } }
+  ]
+}

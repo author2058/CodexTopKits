@@ -1,0 +1,52 @@
+{
+  "name": "codex-toolkit-chat",
+  "version": "0.2.33",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./kits/weekly-usage": "./kits/weekly-usage/index.mjs",
+    "./kits/scheduled-reset-marker": "./kits/scheduled-reset-marker/index.mjs",
+    "./kits/table-style": "./kits/table-style/index.mjs",
+    "./kits/image-viewer-close": "./kits/image-viewer-close/index.mjs",
+    "./kits/selection-actions-delay": "./kits/selection-actions-delay/index.mjs",
+    "./kits/file-line-highlight": "./kits/file-line-highlight/index.mjs",
+    "./kits/rich-paste-boundary": "./kits/rich-paste-boundary/index.mjs",
+    "./kits/context-meter": "./kits/context-meter/index.mjs",
+    "./kits/output-speed": "./kits/output-speed/index.mjs",
+    "./kits/composer-timer": "./kits/composer-timer/index.mjs",
+    "./kits/live-model-output": "./kits/live-model-output/index.mjs",
+    "./kits/message-labels": "./kits/message-labels/index.mjs",
+    "./kits/history-show-all": "./kits/history-show-all/index.mjs",
+    "./kits/title-emoji": "./kits/title-emoji/index.mjs",
+    "./kits/fast-mode-indicator": "./kits/fast-mode-indicator/index.mjs",
+    "./kits/child-model-warning": "./kits/child-model-warning/index.mjs",
+    "./kits/scroll-handoff-fix": "./kits/scroll-handoff-fix/index.mjs",
+    "./kits/scroll-diagnostics": "./kits/scroll-diagnostics/index.mjs",
+    "./plugins/weekly-usage": "./kits/weekly-usage/index.mjs",
+    "./plugins/scheduled-reset-marker": "./kits/scheduled-reset-marker/index.mjs",
+    "./feature-service": "./src/feature-service.mjs",
+    "./diagnostic-service": "./src/diagnostic-service.mjs",
+    "./history-service": "./src/history-service.mjs"
+  },
+  "peerDependencies": {
+    "codex-toolkit-core": "^0.3.41"
+  },
+  "files": [
+    "src",
+    "!src/reasoning-summaries.mjs",
+    "kits",
+    "assets",
+    "README.md",
+    "toolkit.example.json",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}
