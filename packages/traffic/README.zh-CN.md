@@ -41,7 +41,7 @@ CodexTopKits 的流量优化与计量组件，依赖 [Core](../core/README.zh-CN
 
 安装器合并一条本机 `view_image` Hook，并安装 `codex-bandwidth-images` 技能，不覆盖其他 Hook、AGENTS.md 或信任状态。它记录自己的文件归属，修改 hooks.json 前保留备份；重复安装不叠加条目，已有手动修改或其他安装的同类 Hook 会明确报出冲突。不要将“已登记”理解为“已经运行”。Codex 要求对新增或变化的 Hook 做原生信任确认；可在原生 `/hooks` 界面检查并信任，首次生效时机以当前客户端加载结果为准。[官方 Hook 说明](https://learn.chatgpt.com/docs/hooks)
 
-检查 Hook 只读取实际编码并记录元数据，不转图、不联网、不保存图片正文。技能提供图片生产与消费约定；具体工具覆盖范围见 [COVERAGE.md](./COVERAGE.md)。源码包和机器状态分开，安装路径变化后重新登记规则并重新确认 Hook。
+检查 Hook 只读取实际编码并记录元数据，不转图、不联网、不保存图片正文。技能提供图片生产与消费约定；具体工具覆盖范围见[覆盖说明](./COVERAGE.zh-CN.md)。源码包和机器状态分开，安装路径变化后重新登记规则并重新确认 Hook。
 
 撤除时使用同一组目录：
 
