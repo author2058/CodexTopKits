@@ -1,5 +1,7 @@
 # CodexTopKits — Core
 
+English | [简体中文](README.zh-CN.md)
+
 Kit APIs and independent artifact instructions: [Kits](docs/features.md). The first standalone definition is [Footer](kits/footer/README.md); existing aggregate module entry points remain compatible.
 
 Failed components automatically retry their recovery operation, waiting 5 seconds between completed attempts. The default health indicator stays quiet for the first minute of a continuous failure, then shows the error while retries continue. A successful health report clears the error immediately and stops that component's retries. Components that are working normally have no retry timer. Diagnostics retain the original failure details. Recovery does not replay model requests or user actions, restart Codex, or activate prepared Kit updates.
@@ -8,15 +10,15 @@ Aggregate plugins may provide an idempotent `recover()` method; Core otherwise u
 
 Since Core 0.3.43, report `recoverable: false` through `context.setHealth()` when reconnecting cannot repair the reported failure. These failures are shown immediately and are not automatically retried by Core; a healthy report clears them, and an explicit check remains available. Renderer-reported Kit errors use this mode. Other components retain the existing recovery behavior. Kit error and recovery transitions are recorded in the existing `stateDirectory/events.jsonl` as `kit-health-changed`, including the target, execution context and original error details.
 
-CodexTopKits 的公共运行底座。独立 Kit 通过本包的公开接口接入；[Traffic](../traffic/README.md) 提供图片节流与流量计量，[Themes](../themes/README.md) 用于维护外观功能。本包的导入名仍为 `codex-toolkit-core`。
+Core is the shared runtime foundation for CodexTopKits. Independent Kits use its public interfaces. [Traffic](../traffic/README.md) provides image bandwidth tools and measurement, and [Themes](../themes/README.md) manages appearance. The package imports as `codex-toolkit-core`.
 
-本包使用 [Apache License 2.0](LICENSE)。
+The package is licensed under [Apache License 2.0](LICENSE).
 
-本包提供插件生命周期、按需共用 CDP、独立状态目录、UTF-8 日志、健康结果及 Windows 运行入口，不包含主题、语音、图片处理或其他插件。导入本包不会启动程序、连接 Codex 或开放调试端口。
+Core provides component lifecycle management, on-demand shared CDP, dedicated state directories, UTF-8 logs, health results and Windows launch entries. Appearance, voice and image-processing features are supplied by their own components. Importing Core only loads its API; runtime startup and CDP activation are explicit actions.
 
-需要 Node.js 24。运行 `npm test` 可执行本包的离线测试。
+Requires Node.js 24. Run `npm test` for the package's offline tests.
 
-CDP 命令超时会以 `cdp-command-timeout` 写入 `stateDirectory/events.jsonl`，记录组件、目标、操作名、等待预算和实际耗时，不保存执行表达式或聊天正文。该诊断不改变超时预算，也不重发命令。
+A CDP command timeout produces `cdp-command-timeout` in `stateDirectory/events.jsonl`, recording the component, target, operation name, wait budget and actual elapsed time. Expressions and chat bodies stay out of that diagnostic. The record preserves the original timeout and command outcome.
 
 ```js
 import { createPluginHost } from 'codex-toolkit-core';
@@ -29,39 +31,39 @@ console.log(host.health());
 await host.close();
 ```
 
-插件声明 `id`、`coreApiVersion: 1` 和 `start(context)`；启动后必须返回 `close()`，也可提供异步 `check()` 执行诊断。宿主提供该插件的 `stateDirectory`、`log(entry)` 和 `setHealth({ ok, message })`。只有传入宿主的插件才会运行，宿主不下载其他插件。插件代码具有当前用户的权限，宿主不提供安全沙箱。
+A component declares `id`, `coreApiVersion: 1` and `start(context)`. Startup returns `close()` and may expose an asynchronous `check()`. The host supplies its `stateDirectory`, `log(entry)` and `setHealth({ ok, message })`. Only explicitly configured, installed components run. Component code has the current user's permissions.
 
-## 共用 CDP
+## Shared CDP
 
-需要 CDP 的插件额外声明 `cdpPort: 'auto'` 或显式端口。Core 合并各插件的需求，统一选择端口和传递应用启动参数；显式端口冲突会在启动插件前报错。没有组件请求 CDP 时，不创建连接或调试启动参数。
+Components requiring CDP declare `cdpPort: 'auto'` or an explicit port. Core combines the requirements, selects the port and passes the application launch arguments. Conflicting explicit ports fail before components start. CDP connections and debug arguments are created only when requested.
 
-插件通过 `await context.cdp.acquire({ signal })` 获取自己的访问对象。Core 只维护一个浏览器 WebSocket 和 target 目录，消费者可用 `targets()` 读取目录、在 `handlers` 集合订阅事件，并用 `send(method, params, sessionId?, timeoutMs?)` 发送命令。不同插件附加的会话分开归属，停止时 `await client.close()` 只释放本插件会话，不关闭其他消费者。插件的停止信号可取消自身启动等待，不会取消其他插件的连接。
+A component obtains its own access object with `await context.cdp.acquire({ signal })`. Core owns one browser WebSocket and target directory. Consumers read `targets()`, subscribe through `handlers` and call `send(method, params, sessionId?, timeoutMs?)`. Each component owns its attached sessions. `await client.close()` releases that component's sessions while other consumers remain connected. A component's abort signal cancels only its own startup wait.
 
-Core 0.3.5 起，已建立的连接因应用退出或更新而断开时，Core 会注销旧 target 并在同一端口等待应用重新连接。插件用 `context.cdp.onReconnect(callback)` 订阅恢复，回调中重新 `acquire` 并附加自己的会话；订阅返回取消函数，插件关闭时应调用它。旧访问对象保持关闭，不能借此使用新连接。重连沿用 60 秒启动等待，只等待已知的连接拒绝／重置；解析、身份或其他未知错误直接报告，不自动重试。
+Since Core 0.3.5, disconnection after application exit or update unregisters old targets and waits on the same port. Subscribe through `context.cdp.onReconnect(callback)`; the callback acquires access again and attaches its own sessions. Call the returned unsubscribe function on shutdown. Old access objects remain closed. Reconnection uses the 60-second startup wait for known connection refusals or resets; parsing, identity and unexpected errors are reported immediately.
 
-浏览器 Tracing 同一时刻只有一个拥有者；消费者不能启动第二条 trace，也不能结束其他消费者的 trace。拥有者须等待自己的 `Tracing.tracingComplete`，再释放 CDP。窗口销毁或会话分离会取消其未完成命令，错误码为 `CDP_TARGET_CLOSED`；其他协议错误保留原 code、data 和诊断。浏览器连接中断须在插件检查入口重新接入，不掩盖为正常空目录。
+Browser tracing has one owner at a time. The owner waits for its own `Tracing.tracingComplete` before releasing CDP. Closing a target or detaching a session cancels its pending commands with `CDP_TARGET_CLOSED`. Other protocol errors retain their original code, data and diagnostics. A browser-connection interruption requires reconnection through the component's check entry and remains an explicit error until recovered.
 
-CDP 延迟到首次使用才连接，服务可以先于应用启动。首次连接沿用 60 秒冷启动等待预算，只对本机尚未开放的监听器重试；解析、HTTP、身份及未知错误立即报告。常规命令保留原有 8 秒预算。端口无密码认证且具有高权限，只应在受信任本机环境中启用。
+CDP connects on first use, allowing services to start before the application. Its initial connection uses a 60-second cold-start budget for a local listener that is still starting. Parsing, HTTP, identity and unexpected errors remain visible. Ordinary commands retain an 8-second budget. CDP has no password authentication and grants broad access; use it in a trusted local environment.
 
-需要 renderer 内原生模块读取时，可从 `codex-toolkit-core/renderer` 使用 `createNativeAssetReader` 与 `loadNativeAppServices`。它们沿实际入口定位已加载的模块，不使用固定构建哈希；模块缺失或歧义保留具体错误。只有实际需要的插件才注入这些函数。
+For native renderer-module access, import `createNativeAssetReader` and `loadNativeAppServices` from `codex-toolkit-core/renderer`. They locate loaded modules through the actual entry rather than a fixed build hash. Missing or ambiguous modules produce specific errors. Components inject these helpers only when needed.
 
-`loadNativeConversationRpc(document, { assets })` 返回现有会话 RPC 的 `forHost(hostId)`。发现过程不加载、恢复会话或重放历史，也不要求未读徽标接口存在；调用方只检查自己实际使用的方法。
+`loadNativeConversationRpc(document, { assets })` returns the existing conversation RPC's `forHost(hostId)`. Discovery inspects available services and preserves existing conversation loading and history. Callers check the methods they actually use; an unread-badge interface is optional for discovery.
 
-`readNativeConversationIdentity(document)` 返回可见主聊天的 `taskKey`、`threadId` 与 `hostId`，供各插件共用；侧栏隐藏时仍从当前聊天读取，不把云端或远程会话当成本地会话。Dot 工作区没有可确认的聊天身份时返回 `null`。
+`readNativeConversationIdentity(document)` returns the visible main chat's `taskKey`, `threadId` and `hostId` for shared use. It reads the current conversation even with the sidebar hidden and retains cloud and remote identities. A Dot workspace with no verifiable chat identity returns `null`.
 
-`readNativeNotification(data)` 读取当前扁平格式或旧嵌套格式的 `mcp-notification`，保留原始参数，不复制、重放或修改事件；格式不符时报告具体错误。
+`readNativeNotification(data)` reads the current flat or legacy nested `mcp-notification` format, preserving the original parameters and event delivery. Invalid formats produce a specific error.
 
-`createNativeBridgeClient(window)` 为一个组件管理原生消息请求。`request(message, responseType, requestId, timeoutMs?)` 对应预加载层的请求／响应，`appServer(method, params, options?)` 返回原生 app-server 结果；错误保留远端 code、data 与 cause。没有待处理请求时不监听消息，`close()` 只取消本客户端的请求并释放监听。实例按组件归属创建，不接管其他组件的请求。
+`createNativeBridgeClient(window)` owns native requests for one component. `request(message, responseType, requestId, timeoutMs?)` uses preload request/response messaging; `appServer(method, params, options?)` returns native app-server results. Remote errors retain their code, data and cause. Message listeners exist only while requests are pending. `close()` cancels that client's requests and releases its listeners.
 
-`acquireFooter(document, owner, hostState)` 让独立插件共用一个底栏和原生内容高度预留。返回 `left`、`center`、`right` 三个容器、`setHostState` 和 `release`；插件自行移除自己的节点，再释放租用。最后一个插件释放时才移除底栏、设置入口和布局样式。设置入口使用同一个 Core 管理地址及错误计数，不依赖某个具体插件安装。
+`acquireFooter(document, owner, hostState)` shares a single footer and native-content height reservation. It returns `left`, `center`, `right`, `setHostState` and `release`. Components remove their own nodes before releasing the lease. The last release removes the footer, settings entry and layout styles. Settings use the same Core manager address and issue count across components.
 
-插件可用 `context.onHostState(listener)` 接收共享管理地址与宿主健康状态，返回的函数用于取消订阅。地址在本机管理服务就绪后提供，健康未变化时不重复通知，宿主关闭时释放订阅。监听器应只更新本地状态，不等待应用或网络启动。`setHealth` 可用 `issueCount` 提供具体接口问题数；未提供时失败组件计为 1，正常组件为 0。
+`context.onHostState(listener)` delivers the shared manager address and host health and returns an unsubscribe function. The address appears once the local manager is ready. Unchanged health produces no duplicate notification, and host closure releases subscriptions. Listeners should update local state synchronously rather than wait for application or network startup. `setHealth` may provide `issueCount`; otherwise a failed component counts as 1 and a healthy one as 0.
 
-重连不能修复的错误可通过 `setHealth` 的 `recoverable: false` 明确报告：错误立即显示，Core 不自动重试，健康报告会清除该错误，仍可主动执行检查。页面 Kit 上报的错误采用此行为，其他组件保留既有恢复方式。Kit 错误与恢复变化以 `kit-health-changed` 写入现有 `stateDirectory/events.jsonl`，包含目标页面、执行上下文和原始错误详情。
+Report `recoverable: false` through `setHealth` when reconnecting cannot repair an error. Core shows these errors immediately, keeps explicit checking available, and clears them after a healthy report. Renderer Kit errors use this mode. Kit health transitions are recorded as `kit-health-changed` in `stateDirectory/events.jsonl`, including the target page, execution context and original error.
 
-## Windows 运行入口
+## Windows launch entries
 
-需要独立的 Node.js 24 和 PowerShell 7。PowerShell 7 是必需运行环境，不支持 Windows PowerShell 5.1，也不会自动降级使用它；请使用 `pwsh.exe`，而不是 `powershell.exe`。在 PowerShell 7 终端中，从安装目录调用 `node_modules/.bin/codex-toolkit.cmd`；将配置示例复制为 `toolkit.json`。插件列表默认为空，只有显式列出的已安装插件才会加载。
+Requires standalone Node.js 24 and PowerShell 7. Use `pwsh.exe`; PowerShell 7 is the required baseline. In a PowerShell 7 terminal, call `node_modules/.bin/codex-toolkit.cmd` from the installation directory and copy the example configuration to `toolkit.json`. The component list starts empty and loads only explicitly listed installed components.
 
 ```powershell
 ./node_modules/.bin/codex-toolkit.cmd start ./toolkit.json
@@ -71,42 +73,42 @@ CDP 延迟到首次使用才连接，服务可以先于应用启动。首次连�
 ./node_modules/.bin/codex-toolkit.cmd stop ./toolkit.json
 ```
 
-`start` 后台运行，`serve` 在当前终端运行；`status` 查询当前实例。`launch` 使用插件的子进程设置和 Codex 注册的启动别名打开应用，执行前须完整退出 Codex。工具不会关闭或复用正在工作的实例，不修改用户环境变量或登录状态。
+`start` runs in the background; `serve` uses the current terminal; `status` queries the current instance. `launch` uses the configured child-process environment and Codex's registered application alias. Fully exit Codex before launching a new instance. Existing working instances, user environment variables and login state are preserved.
 
-If an installer has independently confirmed that all Codex application processes have exited, it may call `stop CONFIG.json --application-exited`. This releases a stale CDP connection before plugin cleanup instead of waiting for the exited application. Do not use this option while Codex is running: it ends the toolkit's shared CDP connection without flushing an active browser trace. Without the option, `stop` retains the normal cleanup order. Incomplete traffic captures are reported as gaps, and unexpected cleanup errors remain visible.
+If an installer has independently confirmed that all Codex application processes have exited, it may call `stop CONFIG.json --application-exited`. This releases a stale CDP connection before plugin cleanup instead of waiting for the exited application. Use it only after confirmed application exit: it ends the shared CDP connection while active browser tracing may still need flushing. Ordinary `stop` retains the normal cleanup order. Incomplete captures are reported as gaps, and unexpected cleanup errors remain visible.
 
-共享 CDP 尚未连接时，`launch` 会在应用打开后恢复一次共享连接，让已安装功能重新附加；应用退出较久、原重连等待已经结束时，也不必再手动检查。该操作不触发整套插件诊断，具体功能错误仍保留在健康状态中。
+If shared CDP is disconnected, `launch` makes one recovery attempt after opening the application so installed features can attach again, including after an earlier reconnection wait has expired. This recovery is separate from full component diagnostics, and specific feature errors remain in health.
 
-`check` 让当前服务执行已安装插件的诊断，检查期间仍可查询状态。检查失败会保留具体错误，不关闭正在使用的应用或代理；插件未提供诊断时只保留其现有健康结果。
+`check` runs installed components' diagnostics while status remains queryable. Failures retain their specific errors and preserve the running application and proxy. Components with no check entry keep their existing health.
 
-调试命令超时后，共享 CDP 会重建一次连接并通知插件重新接入，不重发原命令或模型请求。恢复仍失败时保留错误，不循环重试；新的实际断线或显式重接才重新允许这次恢复。页面插件共用 `codex-toolkit-core/cdp` 的 `initializePage(client, targetId, bindingName)`，初始化失败会释放该会话，成功后再登记供界面同步使用。
+After a debug-command timeout, shared CDP rebuilds the connection once and notifies components to attach again. The original command or model request retains its outcome. A failed recovery stays visible; a new disconnection or explicit reconnect permits another recovery attempt. Page integrations share `initializePage(client, targetId, bindingName)` from `codex-toolkit-core/cdp`; failed initialization releases its session, while success registers it for UI synchronization.
 
-在 `toolkit.json` 中设置独立 PowerShell 7 的位置，例如 `"powershellPath": "C:/Program Files/PowerShell/7/pwsh.exe"`，然后运行：
+Set a standalone PowerShell 7 location in `toolkit.json`, such as `"powershellPath": "C:/Program Files/PowerShell/7/pwsh.exe"`, then run:
 
 ```powershell
 ./node_modules/.bin/codex-toolkit.cmd prepare ./toolkit.json
 ```
 
-该命令在配置旁生成 `start-toolkit.cmd` 和 `open-manager.cmd` 及其 PowerShell 脚本。以后双击前者启动服务并打开 Codex，双击后者打开本机管理页；不要直接双击 `.ps1`。已有未归本安装所有或被手动编辑的入口不会被覆盖。启动失败时窗口会保留具体错误，按 Enter 后关闭；正常启动完成后终端退出。
+This creates `start-toolkit.cmd`, `open-manager.cmd` and their PowerShell scripts beside the configuration. Double-click the first to start the service and Codex, or the second for the current local manager. Use the generated CMD entry for double-click launching. Entries owned by another installation or containing local edits are retained. A failed launch leaves a specific error visible until Enter is pressed; successful launch closes the terminal.
 
-`powershellPath` 应使用不含版本号的稳定入口。Microsoft Store 安装可使用当前用户 `AppData/Local/Microsoft/WindowsApps/pwsh.exe` 的绝对路径；不要绑定 `WindowsApps/Microsoft.PowerShell_<版本号>/pwsh.exe`，该目录会随升级移除。插件如单独配置了 PowerShell 路径，也应使用同一稳定入口。更改路径后重新运行 `prepare`。
+Use a stable, version-independent `powershellPath`. A Microsoft Store installation may use the current user's absolute `AppData/Local/Microsoft/WindowsApps/pwsh.exe` path. Versioned `WindowsApps/Microsoft.PowerShell_<version>/pwsh.exe` directories may be removed by updates. Any component-specific PowerShell path should use the same stable entry. Run `prepare` again after changing it.
 
-管理页只监听本机回环地址，`status` 返回本次实例的 `managerUrl`。页面列出已安装插件的健康状态和管理入口；页面地址带本地访问标识，不应公开分享。更换运行实例后地址可能变化，使用 `open-manager.cmd` 获取当前地址。管理页不开放跨站访问，操作接口还要求管理请求标识。
+The manager listens on loopback; `status` returns its current `managerUrl`. It lists installed component health and management pages. Its address contains a local access identifier, so keep it private. Use `open-manager.cmd` after an instance changes. The service validates local access and requires the management request identifier for operations.
 
-插件可提供 `management: { title, request({ method, url, body }) }`，返回 `{ body, type?, status?, headers? }` 或 `null`；宿主把 `/plugins/<id>/` 下的相对路径交给该插件，统一提供本机 HTTP 服务和访问校验。插件不必再启动另一套管理服务。未安装的插件不产生管理路由。
+A component may provide `management: { title, request({ method, url, body }) }`, returning `{ body, type?, status?, headers? }` or `null`. The host passes relative `/plugins/<id>/` requests to that component through the shared local HTTP service and its access checks. Only installed components have management routes.
 
-需要推送状态的管理页可返回 `{ subscribe(listener) }`，发送 JSON 状态并返回取消订阅函数。Core 通过同一受保护的回环服务提供 SSE，连接或管理服务关闭时释放订阅；不要求插件另开端口或用定时刷新重建控件。
+A management page requiring updates can return `{ subscribe(listener) }`, send JSON state and return an unsubscribe function. Core exposes SSE through the same protected local service and releases subscriptions when the connection or manager closes.
 
-同一状态目录只能有一个运行服务。Windows 命名管道持有所有权，进程退出后自动释放；旧 PID 文件不会导致工具结束其他进程。控制命令使用每次运行生成的本地令牌。状态目录中的 `runtime-stderr.log` 保存后台错误，`events.jsonl` 保存插件事件；每次应用启动助手的错误保存在 `launch-*/stderr.log`。
+One service owns a state directory. A Windows named pipe holds that ownership and releases it on process exit; stale PID files leave unrelated processes intact. Control commands use a per-run local token. `runtime-stderr.log` contains background errors, `events.jsonl` contains component events, and each application-launch helper writes errors to `launch-*/stderr.log`.
 
-`stop` 只关闭本工具的插件和服务，不关闭 Codex；如果 Codex 仍通过节流代理发送请求，停止服务会中断连接，应先退出应用。更改配置前先停止旧服务。
+`stop` closes Toolkit components and services while leaving Codex open. If Codex is using the bandwidth proxy, exit the application before stopping its connection. Stop the old service before changing configuration.
 
-## 升级与撤除
+## Upgrade and remove
 
-先完整退出通过本工具运行的 Codex，再调用 `stop` 并确认服务已停止，然后在安装目录用匹配版本的 Core 和所需组件归档执行严格 peer 安装。保留原 `toolkit.json`、状态和锁文件，不复制其他机器的证书或图片引用。升级不会自动执行；工具不替代 Codex 官方更新。
+Fully exit the Codex instance launched through the Toolkit, call `stop` and confirm service exit. Install matching Core and component archives with strict peer-dependency checking in the same installation. Retain `toolkit.json`, state and lockfiles. Certificates and uploaded image references belong to their original machine. Upgrades are explicit; Codex retains its official updater.
 
-不再使用时，先退出应用并停止服务，再从原生入口打开 Codex；子进程专属环境不影响原生入口。日志与配置默认保留。若已安装某个插件的规则或 Hook，先使用该插件的撤除命令；本包不删除其他插件或用户配置。
+To stop using the Toolkit, exit the application and service, then open Codex through its native entry. Toolkit-specific environment settings belong to launched child processes. Logs and configuration are retained by default. Remove installed component rules or Hooks using their own removal commands.
 
-需要删除程序文件时，在完成上述撤除后移除独立安装目录即可；状态目录若放在安装目录内，先备份需要保留的配置、日志与缓存。不要删除整个 Codex 用户目录或其他工程。
+After removal, the dedicated installation directory can be deleted. If state is stored inside it, first back up the configuration, logs and cache to retain. Keep the Codex home and other projects intact.
 
-测试使用独立临时目录，不读取现有 Codex 配置、凭据或会话。支持范围目前为已验证的 Windows x64；未声明其他平台已验收。
+Tests use isolated temporary directories rather than existing Codex configuration, credentials or chats. The supported deployment target is Windows x64.

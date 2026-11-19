@@ -1,5 +1,7 @@
 # CodexTopKits — SessionRecovery
 
+English | [简体中文](README.zh-CN.md)
+
 SessionRecovery provides optional protection for explicitly registered v1 child chats' model, reasoning effort and service tier when Codex unloads or resumes them. Current v2 workflows use Codex's native settings restoration. Its optional recovery rules help Codex recover the current breakpoint after context compaction without replaying a whole conversation.
 
 This component depends on [Core](../core/README.md) 0.3.5 or newer. It uses Core's existing loopback CDP connection, management page and private state directory. It does not modify the Codex installation or open another debugging port.
@@ -21,7 +23,7 @@ Start Codex through the Toolkit entry. Open **Session Recovery** in the Toolkit 
 
 ## Protect an existing v1 child
 
-Enable the optional `agent-model-protection` Kit in the Kits page first. From Kit 0.1.3 and Core 0.3.37 it defaults to disabled; existing explicit selections remain unchanged. SessionRecovery does not enable a built-in replacement when the Kit is disabled. Ordinary v2 agents do not need protection registration. The Review coordinator's separate send-time settings check remains available.
+Enable the optional `agent-model-protection` Kit in the Kits page first. From Kit 0.1.3 and Core 0.3.37 it defaults to disabled; existing explicit selections remain unchanged. SessionRecovery does not enable a built-in replacement when the Kit is disabled. Ordinary v2 agents do not need protection registration.
 
 Run the following with standalone Node. Use the actual installed CLI and absolute Core state directory:
 

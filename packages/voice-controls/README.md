@@ -1,35 +1,33 @@
 # CodexTopKits — Voice controls
 
-Voice controls adjusts Codex voice playback volume automatically while someone is speaking or manually with a slider. The package imports as `codex-toolkit-voice` and requires [Core](../core/README.md) 0.3.5 or a compatible later version. See the [installation guide](../../docs/getting-started.md) and [voice-volume Kit](kits/voice-volume/README.md). The package is licensed under [Apache-2.0](LICENSE).
+English | [简体中文](README.zh-CN.md)
 
-## 简体中文
+Voice controls adjusts local playback volume during native Codex voice calls. It requires [Core](../core/README.md) 0.3.5 or a compatible later version and can be installed independently. The package imports as `codex-toolkit-voice` and is licensed under [Apache-2.0](LICENSE).
 
-Codex 原生语音通话的本地播放音量控制，依赖 [Core](../core/README.md) 0.3.5 或更新的兼容版本。组件独立安装，不需要 Themes、ChatEnhancements 或 Traffic，npm 导入名为 `codex-toolkit-voice`。
+See the [installation guide](../../docs/getting-started.md) and [voice-volume Kit](kits/voice-volume/README.md).
 
-本包使用 [Apache-2.0](LICENSE)。
+## Behavior
 
-## 使用效果
+A volume slider and an initially selected **Auto** checkbox appear below the voice orb. In Auto mode, microphone activity lasting 200 ms lowers assistant playback to one tenth of its native volume. The lower volume is held for 3 seconds after activity stops, then recovers smoothly. Sounds shorter than 200 ms neither trigger nor extend ducking.
 
-语音圆球下方显示音量滑杆和默认勾选的“自动”。自动模式在麦克风声音持续200毫秒后，将助手的播放音量压低至本次原生音量的十分之一；停顿后保持3秒，再平滑恢复。短于200毫秒的突然响声不会触发或延长压低。
+Dragging the slider immediately switches to manual volume. Select **Auto** again to resume ducking. The playback window and the window containing the orb synchronize through a local page channel; system volume and other applications keep their own levels.
 
-拖动滑杆立即取消“自动”，使用所选的手动音量；再次勾选后恢复音量躲避。语音播放所在窗口与显示圆球的窗口通过本机页面通道同步，不改变系统或其他程序的音量。
+The component reuses the current native call's microphone stream and playback object. Audio, samples and transcripts stay out of its recordings and network traffic. Cloud generation continues while local playback is quieter; the stream keeps playing rather than buffering suppressed audio for later.
 
-插件复用原生通话已有的麦克风流与播放对象，不另外打开麦克风，不记录或上传声音、音频样本及转写。它不会停止云端生成、延后服务端回答或回放先前压低的声音。
+## Install and configure
 
-## 安装与设置
-
-需要 Windows x64、Node.js 24、PowerShell 7 和已安装的 Codex。安装匹配版本的 Core 与本插件，把以下条目加入现有 `toolkit.json`，保留其他插件配置：
+Requires Windows x64, Node.js 24, PowerShell 7 and Codex. Install compatible Core and Voice controls packages, then add this entry to the existing `toolkit.json`, preserving other component settings:
 
 ```json
 { "module": "codex-toolkit-voice", "options": { "cdpPort": "auto" } }
 ```
 
-通过 Core 生成并使用启动入口。完全退出 Codex 后从该入口打开，下一次原生语音通话开始时生效。Core 与其他需要 CDP 的插件共用本机随机端口和浏览器连接，不修改 Codex 安装包。
+Use Core to generate launch entries. Fully exit Codex and open it through the generated entry; controls become active on the next native voice call. Core shares the local CDP port and browser connection with other components that need them.
 
-在 Core 管理页选择“语音音量”可查看接口状态和具体错误，点击“重新检查”可重试已失败的接口。通话中检查不会卸载音量控制；若接口异常，请结束通话后再重试。
+Open **Voice volume** in the Core manager to inspect interface status and specific errors. **Recheck** retries failed interfaces and preserves the controls during a call. End the call before retrying an incompatible interface.
 
-CDP 没有密码认证且权限较高，仅在受信任的本机环境使用。插件拥有当前用户权限，不提供安全沙箱。
+CDP grants broad application access and has no password authentication. Use it in a trusted local environment. Component code runs with the current user's permissions.
 
-## 升级与停用
+## Upgrade and disable
 
-先退出 Codex，再停止 Core、升级插件并从同一入口启动。停用时从 Core 配置中移除此插件；正常卸载会关闭本插件的监听与页面通道，恢复其持有的原生播放音量。不会修改系统音量、语音内容或其他插件配置。
+Exit Codex, stop Core, upgrade the component and start through the same entry. To disable it, remove the component from the Core configuration. Normal unloading closes its listeners and page channels and restores the native playback volume it held. System volume, voice content and other components' configuration are preserved.

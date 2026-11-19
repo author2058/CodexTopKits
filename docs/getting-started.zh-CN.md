@@ -91,4 +91,4 @@ node state/local/node_modules/codex-toolkit-core/src/cli.mjs stop ./state/local/
 - 管理器语言选项包含跟随宿主的自动模式、英语和简体中文。
 - 修改后的 Hook 可能需要在 Codex 的 **Settings → Hooks** 中批准，并在新 Codex 会话中加载；可通过状态显示核对是否已启用。
 
-[app-restart Kit](../packages/core/kits/app-restart/README.md#简体中文)提供带 20 秒确认倒计时的 **File → Restart with CodexTopKits**。开发其他 Kit 可参考 [Kit API 指南](../packages/core/docs/features.md)。
+[app-restart Kit](../packages/core/kits/app-restart/README.zh-CN.md)提供带 20 秒确认倒计时的 **File → Restart with CodexTopKits**。开发其他 Kit 可参考 [Kit API 指南](../packages/core/docs/features.md)。

@@ -1,39 +1,37 @@
 # CodexTopKits — Themes
 
-Themes adds project and chat colors and UI font-size controls to Codex. The package imports as `codex-toolkit-themes` and requires [Core](../core/README.md). See the [installation guide](../../docs/getting-started.md) and [appearance Kits](../../README.md#appearance) for setup and individual features. The package is licensed under [Apache-2.0](LICENSE).
+English | [简体中文](README.zh-CN.md)
 
-## 简体中文
+Themes provides project and chat colors for Codex through [Core](../core/README.md). Its package name is `codex-toolkit-themes`, licensed under [Apache-2.0](LICENSE). See the individual [appearance Kits](../../README.md#appearance).
 
-CodexTopKits 的工程与会话配色组件，依赖 [Core](../core/README.md)。本包的安装名为 `codex-toolkit-themes`，使用 [Apache-2.0](LICENSE)。
+The component provides 12 hue presets and dark-gray neutral, project colors, per-chat overrides or inheritance, four global color-category switches, and an 11–24 px UI font-size override. Each manager entry displays its representative color. **Native** removes the theme colors; **Inherit** follows the project. Font size is a separate global setting, preserving editor and code-font variables.
 
-本组件提供 12 个色相预设和深灰 neutral、工程配色、会话覆盖或继承、四类全局颜色开关，以及 11 到 24px 的 UI 字号覆盖。管理页中每个条目显示当前代表色；选择“原生”移除主题颜色，选择“继承”跟随所属工程。字号单独使用全局设置，不改编辑器或代码字体变量。
+Themes targets the main Codex interface. Right-side chats keep their native colors, and pet and voice-overlay windows keep their own backgrounds and font size. Toolbar, output labels, voice and Windows actions are managed by their respective components.
 
-主题只作用于 Codex 主界面；右侧聊天区域保留原生颜色，桌宠和语音悬浮窗不应用主界面的背景和字号。底栏、输出标号、语音及 Windows 系统操作由其他组件独立维护，本包不自动安装或开启这些功能。
+## Install and start
 
-## 安装与启动
+Requires Windows x64, standalone Node.js 24 and PowerShell 7. Prepare Core using the [installation guide](../../docs/getting-started.md), then select the appearance Kits to use.
 
-需要 Windows x64、独立 Node.js 24 和 PowerShell 7。按[安装指南](../../docs/getting-started.zh-CN.md)准备 Core，再选择需要的外观 Kits。
+Start with this package's `toolkit.example.json`, set a standalone `powershellPath`, and run Core's `prepare` to generate launch and management entries. Fully exit Codex, then use `start-toolkit.cmd`. Open `open-manager.cmd` and select **Themes and appearance**.
 
-使用本包的 `toolkit.example.json` 作为安装配置，在其中补充独立 `powershellPath`，再运行 Core 的 `prepare` 生成启动和管理入口。完整退出 Codex 后，通过 `start-toolkit.cmd` 启动；使用 `open-manager.cmd` 打开工具集，再进入“主题与外观”。
+Themes uses CDP. `cdpPort` defaults to `auto`; Core assigns a local port and shares the browser connection and target directory among components. A fixed port can be specified consistently in the options. CDP grants broad application access and has no password authentication, so use it in a trusted local environment. The Toolkit uses loopback connections and listeners.
 
-本组件需要 CDP。`cdpPort` 默认为 `auto`，端口由 Core 统一分配；多个组件共享同一个浏览器连接和窗口目录，不各自建立控制器。需要固定端口时可在 options 中填写同一端口。随机端口不能代替认证：CDP 没有密码认证并具有高权限，只能在受信任本机环境使用；工具只连接和监听回环地址。
+Installing or importing the package and changing theme settings preserve a running Codex session. Initial CDP enablement takes effect after fully exiting and reopening the application; later color and font-size changes are distributed immediately.
 
-安装、导入源码或修改主题设置不会关闭正在工作的 Codex。首次启用 CDP 需要完整退出后重开；之后配色和字号修改即时分发，不需重启应用。
+## Configuration and compatibility
 
-## 配置与兼容检查
+The default color map is `plugins/themes/theme-map.json` under the Toolkit state directory. An absolute `mapPath` option can select another file. Missing configuration creates the built-in presets; an existing file that fails parsing is retained and produces a specific error. Project names, chat IDs and custom colors stay in the installation's local state.
 
-主题配置默认位于工具集状态目录下的 `plugins/themes/theme-map.json`。也可在 options 中用绝对 `mapPath` 指向单独的配置文件。配置缺失时创建内置预设；已有配置解析失败时明确报错，不覆盖原文件。工程名、会话 ID 和自定义配色属于该机数据，不放入源码仓库。
+Project identity primarily comes from native project IDs, directories and conversation metadata, with the sidebar as a supplemental source. Window creation, navigation, closure, project notifications and configuration-file changes trigger updates. The manager uses Core's local event stream; hidden pages unsubscribe, and background updates retain open color controls.
 
-工程归属优先使用当前会话的原生项目 ID、工程目录和会话元数据；侧栏只是可用的补充来源。窗口创建、导航、关闭、工程归属通知和配置文件变更触发更新，不循环扫描所有窗口。管理页通过 Core 的本机事件流更新，隐藏页面时停止订阅，展开的配色控件不因后台更新被重建。
+**Check interfaces** inspects the current main window again. After a client update, changes to modules, project metadata, the message bridge or DOM interfaces appear as concrete errors in the manager and Core health. An incompatible integration reports its problem. If a previous theme controller still owns the page, stop that controller before enabling this module.
 
-管理页的“检查接口”重新检查当前主窗口。客户端升级后，模块、工程目录、消息桥或 DOM 接口变化会在管理页和 Core 健康结果中显示具体错误，不把“没有读取到”当成原生配色成功。新格式不兼容时不要同时启动旧主题控制器；本组件会报告重复拥有者，不覆盖旧注入。
+## Upgrade and remove
 
-## 升级与撤除
+Fully exit the Codex instance started through the Toolkit, stop Core and confirm that the service has exited before replacing program files. Install compatible versions and retain configuration and state. Codex updates continue through its official updater.
 
-升级程序文件前，先完整退出通过本工具启动的 Codex，经 Core 停止服务并确认退出，再安装匹配版本；保留原配置和状态目录。本包不接管 Codex 官方安装更新。
+To remove Themes alone, stop the Toolkit and remove its entry from the `plugins` list. Stopping removes this component's styles, subscriptions, early-injection scripts and CDP sessions, while retaining personal colors and other components' browser tracing. To close the application's debug port when CDP features are no longer needed, fully exit Codex and reopen it through its native entry.
 
-单独移除 Themes 时，先停止本工具，再从配置的 plugins 列表移除此组件。停止会移除自身的样式、订阅、早期注入脚本和 CDP 会话，不停止其他组件拥有的浏览器 Tracing，也不删除个人配色。若不再需要任何 CDP 功能，完整退出 Codex 后从原生入口重新启动，以关闭调试端口。
+## Compatibility limits
 
-## 已知限制
-
-本组件依赖 Codex 的内部接口。客户端升级后可能无法换色或读取工程归属，管理页会显示具体问题；可先停用 Themes，保留其他组件。它不会修改 Codex 安装包，也不会自动回退到旧控制器。
+Themes relies on Codex's internal interfaces. A client update may interrupt color application or project detection; the manager shows the specific problem. Themes can be disabled while retaining other components. The integration reports incompatible interfaces while keeping installed Codex files unchanged.
