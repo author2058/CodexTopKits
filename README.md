@@ -93,6 +93,7 @@ Each link opens the Kit's own usage instructions.
 - [voice-volume](packages/voice-controls/kits/voice-volume/README.md) — Ducks voice playback while speaking and provides a manual volume slider.
 - [agent-composer](packages/session-recovery/kits/agent-composer/README.md) — Restores an interactive composer in supported read-only child-agent panels.
 - [agent-model-protection](packages/session-recovery/kits/agent-model-protection/README.md) — Restores registered v1 child-agent model, reasoning and speed settings before protected sends.
+- [role-model-selection](packages/session-recovery/kits/role-model-selection/README.md) — Applies configurable role-based model and reasoning recommendations to chats.
 - [context-recovery-integration](packages/session-recovery/kits/context-recovery-integration/README.md) — Installs a bounded post-compaction recovery workflow for Codex chats.
 
 ### Image bandwidth and traffic

@@ -21,6 +21,10 @@ SessionRecovery 为显式登记的 v1 子聊天提供可选保护，在 Codex �
 
 `restoreAgentComposer` 可在恢复后使用 Codex 已有的可交互子聊天面板重新打开只读 v1 子代理。组件先核验原生路径和父子关系；接口变更或存在歧义时报告具体问题。适用范围是原生支持交互的 v1 路径。
 
+## 按角色选择模型
+
+可选的 [Role Model Selection Kit](kits/role-model-selection/README.zh-CN.md) 可为各聊天应用角色推荐的模型与思考档位。聊天默认不分配角色，选择角色后才应用推荐。Kit 支持编辑角色与推荐参数，默认优先选择占所选模型版本总请求数超过一半的档位，并保留聊天的服务档位和全局默认设置。
+
 ## 保护已有 v1 子聊天
 
 先在 Kits 页启用可选的 `agent-model-protection`。从 Kit 0.1.3 和 Core 0.3.37 起，该 Kit 默认关闭，已有显式选择保持不变。SessionRecovery 遵循该开关；普通 v2 子代理使用原生恢复能力。

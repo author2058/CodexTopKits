@@ -91,6 +91,9 @@ test('sets up only needed services and rejects unsupported services', async () =
   assert.throws(() => createConfig([item], { ...paths, destination: 'relative' }), /absolute path/);
   const guard = plugin(createConfig(selectKits(catalog, ['update-restart-protection']), paths), 'codex-toolkit-core/kit-runtime');
   assert.equal(guard.options.services['restart-protection'].options.powershellPath, paths.powershell);
+  const roles = plugin(createConfig(selectKits(catalog, ['role-model-selection']), paths), 'codex-toolkit-core/kit-runtime');
+  assert.deepEqual(roles.options.enabled, ['role-model-selection']);
+  assert.deepEqual(roles.options.services, { 'role-models': { module:'codex-toolkit-session/role-model-service' } });
 });
 
 test('preserves a failing subprocess error', async t => {

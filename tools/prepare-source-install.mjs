@@ -63,6 +63,7 @@ export function createConfig(kits, { destination, node, powershell, codexHome, o
     'chat-history': { module: 'codex-toolkit-chat/history-service', ...(codexHome ? { options: { codexHome } } : {}) },
     'app-restart': { module: 'codex-toolkit-core/app-restart-service', options: { configPath, powershellPath: powershell } },
     'session-runtime': { module: 'codex-toolkit-session/model-protection-service', startBeforeCdp: true },
+    'role-models': { module: 'codex-toolkit-session/role-model-service' },
     'context-recovery': { module: 'codex-toolkit-session/context-recovery-service', startBeforeCdp: true, options: { codexHome, nodeExecutable: node, powershell } },
     'image-policy': { module: 'codex-bandwidth/image-policy-service', startBeforeCdp: true, options: { codexHome, nodeExecutable: node } },
     'image-reference': { module: 'codex-bandwidth/image-reference-service', startBeforeCdp: true },

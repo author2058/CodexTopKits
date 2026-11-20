@@ -58,6 +58,26 @@ test('the real WebSocket error-before-close shutdown remains unconfirmed for pro
   assert.match(result.connectionError.stack, /onSocketClose/);
 });
 
+test('native quit accepts chat route queries and fragments while excluding other surfaces', async () => {
+  const excluded = [
+    { type: 'page', url: 'app://-/index.html?initialRoute=%2Favatar-overlay' },
+    { type: 'page', url: 'app://-/detached-window.html?initialRoute=%2Fdetached-window' },
+    { type: 'page', url: 'https://example.test/index.html' },
+    { type: 'iframe', url: 'app://-/index.html' },
+  ];
+  class Socket extends EventTarget {
+    constructor(url) { super(); assert.equal(url.href, 'ws://127.0.0.1:13333/devtools/page/chat'); queueMicrotask(() => this.dispatchEvent(new Event('open'))); }
+    close() {}
+    send() { queueMicrotask(() => this.dispatchEvent(new MessageEvent('message', { data: JSON.stringify({ id: 1, result: { result: { value: { quitRequested: true } } } }) }))); }
+  }
+  const deps = { Socket, request: async () => ({ cdp: { connected: true, port: 13333 } }) };
+  for (const suffix of ['', '?initialRoute=%2Flocal%2Ffixture', '#chat', '?initialRoute=%2Flocal%2Ffixture#chat']) {
+    const fetchImpl = async () => ({ ok: true, json: async () => [...excluded, { type: 'page', url: 'app://-/index.html' + suffix, webSocketDebuggerUrl: 'ws://127.0.0.1:13333/devtools/page/chat' }] });
+    assert.equal((await quitNativeApplication('fixture', { ...deps, fetchImpl })).quitRequested, true);
+  }
+  await assert.rejects(quitNativeApplication('fixture', { ...deps, fetchImpl: async () => ({ ok: true, json: async () => excluded }) }), /No Codex chat window/);
+});
+
 test('a debug transport failure before dispatch retains its original error', async () => {
   const original = new TypeError('fixture connection failed');
   class Socket extends EventTarget {

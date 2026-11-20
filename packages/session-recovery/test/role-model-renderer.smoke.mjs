@@ -1,0 +1,78 @@
+// Runs in an isolated iframe. No native requests or model traffic.
+export async function runRoleModelBrowserChecks(document, h) {
+  const frame=document.createElement('iframe');frame.style.cssText='position:fixed;inset:0;width:min(800px,100%);height:min(520px,100%);border:0';document.body.appendChild(frame);
+  const doc=frame.contentDocument, view=frame.contentWindow, results=[];
+  const check=(name,value)=>{results.push({name,ok:Boolean(value)});if(!value)throw new Error('Role fixture failed: '+name);};
+  const ticks=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>{const channel=new view.MessageChannel();channel.port1.onmessage=()=>{channel.port1.close();channel.port2.close();resolve();};channel.port2.postMessage(null);});};
+  let resized;view.ResizeObserver=class {constructor(fn){resized=fn;}observe(){}disconnect(){}};
+  const names=['Responder','Implementer','Operator','General reviewer','Advanced reviewer','Researcher'];
+  const families=['sol','terra','luna','sol','astra','astra'];
+  const roles=names.map((name,i)=>({id:'role'+i,name,family:families[i]}));
+  let data={roleModels:{policy:{version:1,roles,selection:{excludedEfforts:['ultra'],excludeUnused:true,aboveMean:true,minIntelligenceGainPercent:5,minSpeedPercent:66}},assignments:{},recommendationsValidated:true,recommendations:{selections:Object.fromEntries(['sol','terra','astra','luna'].map(f=>[f,{selected:{model:'gpt-6.2-'+f,effort:'high'}}]))}}};
+  let stateChanged,domChanged,localeChanged,locale='en',active=false,threadId='fixture-thread',gate;
+  const errors=new Map(),calls=[],actions=[];
+  doc.body.innerHTML='<main><div class="ComposerLayoutRoot" style="width:700px"><div contenteditable="true"></div><div id="controls" style="display:flex"><span id="context"><span role="img" aria-label="Context usage: 60%"><svg><circle pathLength="100"></circle></svg></span></span><span id="model-wrap"><button data-composer-navigation-target="reasoning"></button></span></div></div></main>';
+  const root=doc.querySelector('.ComposerLayoutRoot'), trigger=doc.querySelector('button');
+  const selection={model:'gpt-6.1-sol',reasoningEffort:'high'};
+  const api={modelSettings:{...selection},async selectComposerModelAndReasoningEffort(model,effort,_callback,options){calls.push({model,effort,options});Object.assign(this.modelSettings,{model,reasoningEffort:effort});Object.assign(selection,{model,reasoningEffort:effort});return true;}};
+  const owner={memoizedProps:{hasThreadResumeFailed:false,conversationId:threadId},updateQueue:{memoCache:{data:[[api,{modelSelection:api}]]}}};
+  trigger.__reactFiber$fixture={memoizedProps:{selectedLabelCandidate:selection},return:{memoizedProps:{models:['sol','terra','astra','luna'].map(f=>({model:'gpt-6.2-'+f,supportedReasoningEfforts:[{reasoningEffort:'high'}]})),onSelectModel(){}},return:owner}};
+  const context={document:doc,i18n:{get locale(){return locale;},t:(m,k)=>m[locale][k],onChange:fn=>{localeChanged=fn;return()=>{};}},getRuntimeState:()=>data,onRuntimeState:fn=>{stateChanged=fn;return()=>{};},onDomChange:fn=>{domChanged=fn;return()=>{};},reportError:(e,k)=>e?errors.set(k,e):errors.delete(k),dispatch:action=>{actions.push(action);if(action.operation==='assign'){const k=JSON.stringify([action.value.hostId,action.value.threadId]);if(action.value.roleId)data.roleModels.assignments[k]=action.value.roleId;else delete data.roleModels.assignments[k];}data.roleModels.receipt={requestId:action.requestId,ok:true};stateChanged();}};
+  const helpers={...h,readNativeConversationIdentity:()=>({hostId:'local',taskKey:threadId}),createNativeBridgeClient:()=>({appServer:async(method,params)=>{
+    const result=method==='thread/read'?{thread:{id:params.threadId,status:{type:active?'active':'idle'}}}:{model:api.modelSettings.model,reasoningEffort:api.modelSettings.reasoningEffort,serviceTier:'priority'};
+    if(gate?.method===method&&gate.threadId===params.threadId&&!gate.resolve)return new Promise((resolve,reject)=>{gate.resolve=()=>resolve(result);gate.reject=reject;});
+    return result;
+  },close(){}})};
+  let kit;
+  try {
+    kit=h.createRoleModelSelection(context,helpers);await ticks();
+    const select=doc.querySelector('.cdtk-role-picker');
+    check('unassigned default and six English role names',select.value===''&&[...select.options].slice(1,7).map(o=>o.textContent).join('|')===names.join('|'));
+    select.focus({focusVisible:true});
+    const triggerStyle=view.getComputedStyle(select), arrow=view.getComputedStyle(select,'::picker-icon');
+    check('role trigger centers the text and uses the native-size chevron and round keyboard ring',select.matches(':focus-visible')&&triggerStyle.alignItems==='center'&&triggerStyle.outlineStyle==='none'&&triggerStyle.boxShadow.includes('2px')&&arrow.width==='16px'&&arrow.height==='16px'&&arrow.maskImage.includes('M10.2954'));
+    select.blur();
+    const shortWidth=select.getBoundingClientRect().width;select.value='role4';
+    check('closed picker width follows the selected label',select.getBoundingClientRect().width>shortWidth+16);
+    select.value='';
+    check('between context circle and model wrapper',select.previousElementSibling.id==='context'&&select.nextElementSibling.id==='model-wrap');
+    for(let i=0;i<5;i++)domChanged();await ticks();check('idempotent control and no unassigned native writes',select===doc.querySelector('.cdtk-role-picker')&&doc.querySelectorAll('.cdtk-role-picker').length===1&&calls.length===0);
+    select.value='role0';select.dispatchEvent(new view.Event('change'));await ticks();
+    check('role applies native model and effort without global defaults',calls.length===1&&calls[0].model==='gpt-6.2-sol'&&calls[0].options.persistAsDefault===false&&!Object.hasOwn(calls[0].options,'serviceTier')&&errors.size===0);
+    trigger.removeAttribute('data-composer-navigation-target');domChanged();await ticks();
+    check('context fallback retains same node and position',select===doc.querySelector('.cdtk-role-picker')&&select.previousElementSibling.id==='context'&&select.nextElementSibling.id==='model-wrap');
+    root.style.width='320px';resized([{contentRect:{width:320}}]);await ticks();check('narrow composer compact variant',select.dataset.compact==='true');
+    locale='zh-Hans';localeChanged();await ticks();check('role names remain English across locales',select.options[1].textContent==='Responder'&&select.options[0].textContent==='未指定');
+    Object.assign(api.modelSettings,{model:'gpt-6.1-sol',reasoningEffort:'high'});domChanged();await ticks();check('manual model change returns to unassigned',select.value===''&&!data.roleModels.assignments[JSON.stringify(['local',threadId])]);
+    active=true;select.value='role1';select.dispatchEvent(new view.Event('change'));await ticks();check('active turn defers role application',calls.length===1&&select.value==='role1');
+    active=false;view.dispatchEvent(new view.MessageEvent('message',{data:{type:'mcp-notification',notification:{method:'turn/completed',params:{threadId}}}}));await ticks();check('idle event applies pending role',calls.length===2&&calls[1].model==='gpt-6.2-terra');
+    owner.memoizedProps.conversationId='different-thread';threadId='different-thread';domChanged();await ticks();check('same composer reused for another thread resets role',select.value==='');
+    data.roleModels.assignments[JSON.stringify(['local',threadId])]='role0';owner.memoizedProps.conversationId=null;domChanged();await ticks();check('new draft does not inherit the main chat assignment',select.value==='');
+    const beforeActions=actions.length;select.value='role2';select.dispatchEvent(new view.Event('change'));await ticks();check('draft role changes only its composer before an ID exists',calls.at(-1).model==='gpt-6.2-luna'&&actions.length===beforeActions);
+    root.querySelector('[contenteditable]').dispatchEvent(new view.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+    view.dispatchEvent(new view.MessageEvent('message',{data:{type:'mcp-notification',notification:{method:'thread/started',params:{thread:{id:'created-thread'}}}}}));
+    owner.memoizedProps.conversationId='created-thread';threadId='created-thread';domChanged();await ticks();check('submitted draft role persists on its native thread creation',data.roleModels.assignments[JSON.stringify(['local',threadId])]==='role2');
+    owner.memoizedProps.conversationId=null;domChanged();await ticks();select.value='role0';select.dispatchEvent(new view.Event('change'));await ticks();
+    owner.memoizedProps.conversationId='created-thread';Object.assign(api.modelSettings,{model:'gpt-6.2-luna',reasoningEffort:'high'});domChanged();await ticks();check('abandoned draft cannot overwrite an existing chat role',data.roleModels.assignments[JSON.stringify(['local','created-thread'])]==='role2'&&select.value==='role2');
+    gate={method:'thread/resume',threadId:'async-A'};owner.memoizedProps.conversationId=threadId='async-A';data.roleModels.assignments[JSON.stringify(['local',threadId])]='role0';domChanged();await ticks();check('delayed model readback is armed',typeof gate.resolve==='function');
+    owner.memoizedProps.conversationId=threadId='async-B';data.roleModels.assignments[JSON.stringify(['local',threadId])]='role2';Object.assign(api.modelSettings,{model:'gpt-6.2-luna',reasoningEffort:'high'});domChanged();await ticks();gate.resolve();await ticks();check('old async readback cannot clear the destination role',data.roleModels.assignments[JSON.stringify(['local','async-B'])]==='role2'&&select.value==='role2');
+    gate={method:'thread/read',threadId:'active-A'};active=true;owner.memoizedProps.conversationId=threadId='active-A';data.roleModels.assignments[JSON.stringify(['local',threadId])]='role0';domChanged();await ticks();
+    owner.memoizedProps.conversationId=threadId='idle-B';active=false;data.roleModels.assignments[JSON.stringify(['local',threadId])]='role1';domChanged();await ticks();gate.resolve();await ticks();check('old active response cannot defer the new idle chat',select.value==='role1'&&api.modelSettings.model==='gpt-6.2-terra');gate=null;
+    root.style.display='none';domChanged();await ticks();check('hidden child composer releases its control',!doc.querySelector('.cdtk-role-picker'));
+    root.style.display='block';domChanged();await ticks();check('shown child composer restores its role',doc.querySelector('.cdtk-role-picker')?.value==='role1');
+    const shown=doc.querySelector('.cdtk-role-picker');shown.value='__settings__';shown.dispatchEvent(new view.Event('change'));check('editable role settings dialog',Boolean(doc.querySelector('dialog[open] input[type=text]')));
+    doc.querySelector('dialog').dispatchEvent(new view.Event('cancel',{cancelable:true}));check('Escape cancellation releases the settings dialog',!doc.querySelector('dialog'));
+    shown.value='__settings__';shown.dispatchEvent(new view.Event('change'));check('settings reopen after Escape',Boolean(doc.querySelector('dialog[open]')));
+    const panel=doc.querySelector('dialog[open]'),bounds=panel.getBoundingClientRect();
+    check('settings center within the available viewport',Math.abs(bounds.left+bounds.right-view.innerWidth)<2&&Math.abs(bounds.top+bounds.bottom-view.innerHeight)<2);
+    const table=panel.querySelector('table'), firstRow=panel.querySelector('tbody tr');
+    check('settings list spaces cells and fills the dropdown and remove columns',view.getComputedStyle(table).borderSpacing==='4px 6px'&&[...firstRow.querySelectorAll('select,button')].every(control=>Math.abs(control.getBoundingClientRect().width-control.parentElement.getBoundingClientRect().width)<1));
+    panel.dispatchEvent(new view.Event('cancel',{cancelable:true}));
+    shown.value='';await h.openPicker(shown,frame);
+    const popup=view.getComputedStyle(shown,'::picker(select)');
+    check('open picker fits longer options without widening the trigger',shown.matches(':open')&&parseFloat(popup.width)>shown.getBoundingClientRect().width+16&&parseFloat(popup.borderTopLeftRadius)>0);
+    shown.value='__settings__';shown.dispatchEvent(new view.Event('change'));
+    await kit.close();kit=null;check('cleanup releases controls and settings',!doc.querySelector('.cdtk-role-picker')&&!doc.querySelector('dialog'));
+    return results;
+  } finally { await kit?.close();frame.remove(); }
+}

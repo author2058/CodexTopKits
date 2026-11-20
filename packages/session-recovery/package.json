@@ -1,6 +1,6 @@
 {
   "name": "codex-toolkit-session",
-  "version": "0.1.17",
+  "version": "0.1.19",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
@@ -14,6 +14,8 @@
     "./kits/agent-model-protection": "./kits/agent-model-protection/index.mjs",
     "./kits/context-recovery-integration": "./kits/context-recovery-integration/index.mjs",
     "./model-protection-service": "./src/model-protection-service.mjs",
+    "./role-model-service": "./src/role-model-service.mjs",
+    "./kits/role-model-selection": "./kits/role-model-selection/index.mjs",
     "./context-recovery-service": "./src/context-recovery-kit-service.mjs"
   },
   "bin": {

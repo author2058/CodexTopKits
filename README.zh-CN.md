@@ -93,6 +93,7 @@ CDP 注入存在安全风险：获得调试连接访问权的程序可能读取�
 - [voice-volume](packages/voice-controls/kits/voice-volume/README.zh-CN.md) — 说话时自动降低播放音量，并提供手动音量滑杆。
 - [agent-composer](packages/session-recovery/kits/agent-composer/README.zh-CN.md) — 在受支持的只读子代理面板中恢复可交互输入框。
 - [agent-model-protection](packages/session-recovery/kits/agent-model-protection/README.zh-CN.md) — 在受保护发送前恢复已登记 v1 子代理的模型、思考等级和速度设置。
+- [role-model-selection](packages/session-recovery/kits/role-model-selection/README.zh-CN.md) — 按可配置的会话角色应用推荐模型与思考等级。
 - [context-recovery-integration](packages/session-recovery/kits/context-recovery-integration/README.zh-CN.md) — 为 Codex 聊天安装有界的压缩后恢复流程。
 
 ### 图片带宽与流量

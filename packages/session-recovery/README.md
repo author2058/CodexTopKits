@@ -21,6 +21,10 @@ Start Codex through the Toolkit entry. Open **Session Recovery** in the Toolkit 
 
 `restoreAgentComposer` optionally reopens a restored read-only v1 child in Codex's existing interactive child panel. The plugin first verifies the native route and parent relationship. A changed or ambiguous interface is reported instead of replacing the panel blindly. This option does not convert v2 agents or enable direct input where Codex does not support it.
 
+## Select a model by role
+
+The optional [Role Model Selection Kit](kits/role-model-selection/README.md) lets each chat use a role's recommended model and reasoning effort. Chats remain unassigned until a role is selected. The Kit provides editable roles and recommendation settings, including an enabled-by-default preference for an effort with over half of the selected model version's requests, while preserving each chat's service tier and the global defaults.
+
 ## Protect an existing v1 child
 
 Enable the optional `agent-model-protection` Kit in the Kits page first. From Kit 0.1.3 and Core 0.3.37 it defaults to disabled; existing explicit selections remain unchanged. SessionRecovery does not enable a built-in replacement when the Kit is disabled. Ordinary v2 agents do not need protection registration.

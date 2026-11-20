@@ -8,7 +8,7 @@ export async function quitNativeApplication(stateDirectory, { request = requestR
   const response = await fetchImpl(`http://127.0.0.1:${runtime.cdp.port}/json/list`, { signal: AbortSignal.timeout(10000), redirect: 'error' });
   if (!response.ok) throw new Error('Codex window discovery failed: HTTP ' + response.status);
   const targets = await response.json();
-  const page = targets.find(item => item.type === 'page' && item.url === 'app://-/index.html');
+  const page = targets.find(item => item.type === 'page' && item.url.split(/[?#]/, 1)[0] === 'app://-/index.html' && new URL(item.url).searchParams.get('initialRoute') !== '/avatar-overlay');
   if (!page) throw new Error('No Codex chat window is available for native quit.');
   const url = new URL(page.webSocketDebuggerUrl);
   if (url.protocol !== 'ws:' || url.hostname !== '127.0.0.1' || Number(url.port) !== runtime.cdp.port || url.username || url.password) throw new Error('Codex returned a debug endpoint outside its local session.');
