@@ -15,6 +15,7 @@ test('complete runtime tuple restores atomically, reads back and never changes t
   const first=guard.ensure('child'),second=guard.ensure('child');assert.equal(first,second);
   assert.equal((await first).stage,'restored');
   assert.deepEqual(calls.map(row=>row.method),['thread/resume','thread/settings/update','thread/resume']);
+  assert.deepEqual(calls.filter(row=>row.method==='thread/resume').map(row=>row.params),[{threadId:'child',excludeTurns:true},{threadId:'child',excludeTurns:true}]);
   assert.deepEqual(calls[1].params,{threadId:'child',...desired});assert.deepEqual(registry.threads.child.settings,desired);
   await guard.ensure('ordinary');assert.equal(calls.length,3);await guard.ensure('child');assert.equal(calls.length,3);
   actual={model:'parent',effort:'medium',serviceTier:null};guard.receive('thread/resumed',{threadId:'child'});await tick();assert.equal(calls.length,6);assert.deepEqual(actual,desired);

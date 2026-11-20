@@ -27,13 +27,13 @@ export function createRuntimeGuard(request, initial, onStatus, normalize, same) 
     if (!force && failed.has(threadId)) return Promise.reject(failed.get(threadId));
     if (pending.has(threadId)) return pending.get(threadId);
     const work = (async () => {
-      const beforeResult = await request('thread/resume', { threadId }, 'thread_runtime_recovery_read');
+      const beforeResult = await request('thread/resume', { threadId, excludeTurns: true }, 'thread_runtime_recovery_read');
       const before = normalize(beforeResult);
       if (!before) throw new Error('thread/resume did not return readable model, effort and service tier settings.');
       if (stopped || !same(desired, protectedSettings(threadId))) throw new Error('Protected settings changed during recovery; prepare the send again.');
       const changed = !same(before, desired);
       if (changed) await request('thread/settings/update', { threadId, ...desired }, 'thread_runtime_recovery_write');
-      const after = changed ? normalize(await request('thread/resume', { threadId }, 'thread_runtime_recovery_verify')) : before;
+      const after = changed ? normalize(await request('thread/resume', { threadId, excludeTurns: true }, 'thread_runtime_recovery_verify')) : before;
       if (!same(after, desired)) throw Object.assign(new Error('Thread runtime readback did not match its protected settings.'), { runtimeSettings: { before, desired, after } });
       if (!same(desired, protectedSettings(threadId))) throw new Error('Protected settings changed during recovery; prepare the send again.');
       if (stopped) throw new Error('Thread runtime guard stopped during recovery.');
